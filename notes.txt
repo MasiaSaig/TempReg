@@ -1,0 +1,1 @@
+I2C0 on pins P0[27] and P0[28] use specialized I2C pads that support fully spec compliant fast mode, standard mode, and fast mode plus I2C
