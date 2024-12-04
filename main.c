@@ -8,14 +8,14 @@
 #define TMP2_ADDRESS 0x4B
  
 // I2C driver instance
-extern ARM_DRIVER_I2C            Driver_I2C0;	// 'extern' to be able to access variable, from different file
+extern ARM_DRIVER_I2C            Driver_I2C0;		// 'extern' to be able to access variable, from different file
 static ARM_DRIVER_I2C *I2Cdrv = &Driver_I2C0;
  
 static volatile uint32_t I2C_Event;
  
 // I2C Signal Event function callback
 void I2C_SignalEvent (uint32_t event) {
-  I2C_Event |= event;		// Save received events
+  I2C_Event |= event;			// Save received events
  
   // Optionally, user can define specific actions for an event
   if (event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) {
@@ -53,20 +53,20 @@ int32_t EEPROM_Read_Event (uint16_t addr, uint8_t *buf, uint32_t len) {
   a[0] = (uint8_t)(addr >> 8);
   a[1] = (uint8_t)(addr & 0xFF);
  
-  I2C_Event = 0U;	// Clear event flags before new transfer
+  I2C_Event = 0U;			// Clear event flags before new transfer
  
 	// transmit adress of register(a), which is 2 bytes, without sending STOP signal (pending=true)
   I2Cdrv->MasterTransmit(TMP2_ADDRESS, a, 2, true);
  
-  while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U);							// Wait until transfer completed
-  if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;	// Check if all data transferred
+  while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U);								// Wait until transfer completed
+  if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
  
   I2C_Event = 0U;	// Clear event flags before new transfer
  
   I2Cdrv->MasterReceive(TMP2_ADDRESS, buf, len, false);
  
-  while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U);							// Wait until transfer completed
-  if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;	// Check if all data transferred
+  while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U);								// Wait until transfer completed
+  if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
  
   return 0;
 }
@@ -79,13 +79,13 @@ int32_t EEPROM_Read_Pool (uint16_t addr, uint8_t *buf, int32_t len) {
  
   I2Cdrv->MasterTransmit(TMP2_ADDRESS, a, 2, true);
  
-  while (I2Cdrv->GetStatus().busy);							// Wait until transfer completed
-  if (I2Cdrv->GetDataCount() != len) return -1;	// Check if all data transferred
+  while (I2Cdrv->GetStatus().busy);									// Wait until transfer completed
+  if (I2Cdrv->GetDataCount() != len) return -1;			// Check if all data transferred
  
   I2Cdrv->MasterReceive(TMP2_ADDRESS, buf, len, false);
  
-  while (I2Cdrv->GetStatus().busy);								// Wait until transfer completed
-  if (I2Cdrv->GetDataCount () != len) return -1;	// Check if all data transferred
+  while (I2Cdrv->GetStatus().busy);									// Wait until transfer completed
+  if (I2Cdrv->GetDataCount () != len) return -1;		// Check if all data transferred
  
   return 0;
 }
@@ -115,26 +115,38 @@ int32_t EEPROM_Initialize (bool pooling) {
   } else {
     status = EEPROM_Read_Event (0x00, &val, 1);
   }
- 
   return (status);
 }
+
+
+// TODO: temporary delay (delete later)
+volatile uint32_t msTicks = 0;		/* Variable to store millisecond ticks */
+/* See startup file startup_LPC17xx.s for SysTick vector */  
+void SysTick_Handler(void) { msTicks++; }
+// wait 'time' miliseconds
+void delay(unsigned int time) { msTicks=0; while(msTicks < time ) {} }
+
 
 int main(){
 	initUART0();
  
-	sendString("test");
+	I2C_Event = 0;
+	sendString("Initializing I2C... ");
 	EEPROM_Initialize(false);
-	
-  I2C_Event = 0;
-	EEPROM_Initialize(true);
+	sendString("Initialization of I2C completed. ");
 	
 	const uint32_t dataSize = 2;
 	uint8_t data[dataSize];
+	
+	// TODO: temporary delay (delete later)
+	uint32_t returnCode = SysTick_Config(SystemCoreClock / 10);
+	if(returnCode != 0) { /* handle error */ }
+		
 	while(true){
 		// LPC_UART0->THR is a memory address, holding 8bit character, which is going to be send
-		// LPC_UART0->THR = 'C';	// sending char
-		// sendString("AGH WFIS SW LAB03 TRIAL 1 Lorem ipsum dolor sit amet, Lorem ipsum dolor sit amet\t");	// sending string
-		sendString("test");
+		// LPC_UART0->THR = 'C';										// sending char
+		// sendString("AGH WFIS SW LAB TRIAL\t");		// sending string
+		delay(500);
 		EEPROM_Read_Event(0x0, data, dataSize);
 		sendInt(data[0]);
 		sendInt(data[1]);
