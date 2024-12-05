@@ -6,6 +6,7 @@
 // address is set by selecting jumper blocks on board
 // https://digilent.com/reference/pmod/pmodtmp2/reference-manual
 #define TMP2_ADDRESS 0x4B
+#define TMP2_TEMP_ADDRESS 0x0
  
 // I2C driver instance
 extern ARM_DRIVER_I2C            Driver_I2C0;		// 'extern' to be able to access variable, from different file
@@ -122,14 +123,13 @@ int32_t EEPROM_Initialize (bool pooling) {
  
   // Check if EEPROM can be accessed
   if (pooling == true) {
-    status = EEPROM_Read_Pool (0x00, &val, 1);
+    status = EEPROM_Read_Pool (TMP2_TEMP_ADDRESS, &val, 1);
   } else {
     status = EEPROM_Read_Event(&val, 1);
-//		status = EEPROM_Read_Event_Adr(0x00, &val, 1);
+//		status = EEPROM_Read_Event_Adr(TMP2_TEMP_ADDRESS, &val, 1);
   }
   return (status);
 }
-
 
 // TODO: temporary delay (delete later)
 volatile uint32_t msTicks = 0;		/* Variable to store millisecond ticks */
@@ -140,7 +140,7 @@ void delay(unsigned int time) { msTicks=0; while(msTicks < time ) {} }
 
 
 const uint32_t dataSize = 2;
-uint8_t data[2];
+uint8_t data[2] = {0};
 uint16_t temperatureValue;
 /* https://digilent.com/reference/_media/reference/pmod/pmodtmp2/pmodtmp2_rm.pdf section: Quick Start Operation */
 // Converts MSB and LSB into temperature value, represented in Celsius degrees
@@ -149,13 +149,50 @@ void convertTemperature(){
 	temperatureValue = (temperatureValue>>3) * 0.0625;
 }
 
+// Initialize I2C connected EEPROM
+// TODO: sprawdz tą inicjalizacje
+int32_t EEPROM_Initialize2() {
+  I2Cdrv->Initialize (I2C_SignalEvent);
+	
+//  I2Cdrv->Initialize(I2C_SignalEvent);
+//  I2Cdrv->PowerControl(ARM_POWER_FULL);
+//  I2Cdrv->Control(ARM_I2C_OWN_ADDRESS, 0x78);
+  I2Cdrv->PowerControl (ARM_POWER_FULL);
+  I2Cdrv->Control      (ARM_I2C_BUS_SPEED, ARM_I2C_BUS_SPEED_FAST);
+  I2Cdrv->Control      (ARM_I2C_BUS_CLEAR, 0);
+	
+  I2C_Event = 0U;			// Clear event flags before new transfer
+	
+	/* https://www.analog.com/media/en/technical-documentation/data-sheets/ADT7420.pdf here set configuration etc.*/
+	// pending = true (doesnt send stop), to restart, that is to send 2 start conditions
+	// start send 0x0 -> start read 2 bytes with stop at the end
+	I2Cdrv->MasterTransmit(TMP2_ADDRESS, TMP2_TEMP_ADDRESS, 1, true);
+	// ? trzeba czekać na zakończenie transferu, jeśli nie przesyłamy stop? (Raczej tak??)
+	while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U);								// Wait until transfer completed
+  if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
+	I2Cdrv->MasterReceive(TMP2_ADDRESS, data, 2, false);
+  while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U);								// Wait until transfer completed
+  if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
+ 
+  I2C_Event = 0U;	// Clear event flags before new transfer
+ 
+  I2Cdrv->MasterReceive(TMP2_ADDRESS, data, 2, false);
+  while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U);								// Wait until transfer completed
+  if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
+ 
+  return 0;
+}
+
 int main(){
 	initUART0();
  
 	I2C_Event = 0;
 	sendString("Initializing I2C... ");
-	EEPROM_Initialize(false);
+	sendInt(EEPROM_Initialize(false));
+//	sendInt(EEPROM_Initialize2());
 	sendString("Initialization of I2C completed. ");
+	convertTemperature();
+	sendInt(temperatureValue);
 	
 	// TODO: temporary delay (delete later)
 	uint32_t returnCode = SysTick_Config(SystemCoreClock / 10);
@@ -166,7 +203,9 @@ int main(){
 		// LPC_UART0->THR = 'C';										// sending char
 		// sendString("AGH WFIS SW LAB TRIAL\t");		// sending string
 		delay(500);
-		EEPROM_Read_Event(data, dataSize);
+		I2Cdrv->MasterReceive(TMP2_ADDRESS, data, dataSize, false); 
+		while (I2Cdrv->GetStatus().busy);									// Wait until transfer completed
+		if (I2Cdrv->GetDataCount () != dataSize) return -1;		// Check if all data transferred
 		convertTemperature();
 		sendInt(temperatureValue);
 	}
