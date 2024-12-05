@@ -48,7 +48,7 @@ void I2C_SignalEvent (uint32_t event) {
 }
  
 // Read I2C connected EEPROM (event driven example)
-int32_t EEPROM_Read_Event (uint16_t addr, uint8_t *buf, uint32_t len) {
+int32_t EEPROM_Read_Event_Adr(uint16_t addr, uint8_t *buf, uint32_t len) {
   uint8_t a[2];
   a[0] = (uint8_t)(addr >> 8);
   a[1] = (uint8_t)(addr & 0xFF);
@@ -57,7 +57,6 @@ int32_t EEPROM_Read_Event (uint16_t addr, uint8_t *buf, uint32_t len) {
  
 	// transmit adress of register(a), which is 2 bytes, without sending STOP signal (pending=true)
   I2Cdrv->MasterTransmit(TMP2_ADDRESS, a, 2, true);
- 
   while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U);								// Wait until transfer completed
   if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
  
@@ -70,9 +69,21 @@ int32_t EEPROM_Read_Event (uint16_t addr, uint8_t *buf, uint32_t len) {
  
   return 0;
 }
+
+// Read I2C connected EEPROM (event driven example)
+// TODO: sprawdz czy pobieranie danych odrazu zadziała, bez wysyłania adresu rejestru
+int32_t EEPROM_Read_Event(uint8_t *buf, uint32_t len) {
+  I2C_Event = 0U;			// Clear event flags before new transfer
+  I2Cdrv->MasterReceive(TMP2_ADDRESS, buf, len, false);
+	
+  while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U);								// Wait until transfer completed
+  if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
+ 
+  return 0;
+}
  
 // Read I2C connected EEPROM (pooling example)
-int32_t EEPROM_Read_Pool (uint16_t addr, uint8_t *buf, int32_t len) {
+int32_t EEPROM_Read_Pool(uint16_t addr, uint8_t *buf, int32_t len) {
   uint8_t a[2];
   a[0] = (uint8_t)(addr >> 8);
   a[1] = (uint8_t)(addr & 0xFF);
@@ -113,7 +124,8 @@ int32_t EEPROM_Initialize (bool pooling) {
   if (pooling == true) {
     status = EEPROM_Read_Pool (0x00, &val, 1);
   } else {
-    status = EEPROM_Read_Event (0x00, &val, 1);
+    status = EEPROM_Read_Event(&val, 1);
+//		status = EEPROM_Read_Event_Adr(0x00, &val, 1);
   }
   return (status);
 }
@@ -127,6 +139,16 @@ void SysTick_Handler(void) { msTicks++; }
 void delay(unsigned int time) { msTicks=0; while(msTicks < time ) {} }
 
 
+const uint32_t dataSize = 2;
+uint8_t data[2];
+uint16_t temperatureValue;
+/* https://digilent.com/reference/_media/reference/pmod/pmodtmp2/pmodtmp2_rm.pdf section: Quick Start Operation */
+// Converts MSB and LSB into temperature value, represented in Celsius degrees
+void convertTemperature(){
+	temperatureValue = (data[0]<<8) | data[1];
+	temperatureValue = (temperatureValue>>3) * 0.0625;
+}
+
 int main(){
 	initUART0();
  
@@ -134,9 +156,6 @@ int main(){
 	sendString("Initializing I2C... ");
 	EEPROM_Initialize(false);
 	sendString("Initialization of I2C completed. ");
-	
-	const uint32_t dataSize = 2;
-	uint8_t data[dataSize];
 	
 	// TODO: temporary delay (delete later)
 	uint32_t returnCode = SysTick_Config(SystemCoreClock / 10);
@@ -147,8 +166,8 @@ int main(){
 		// LPC_UART0->THR = 'C';										// sending char
 		// sendString("AGH WFIS SW LAB TRIAL\t");		// sending string
 		delay(500);
-		EEPROM_Read_Event(0x0, data, dataSize);
-		sendInt(data[0]);
-		sendInt(data[1]);
+		EEPROM_Read_Event(data, dataSize);
+		convertTemperature();
+		sendInt(temperatureValue);
 	}
 }
