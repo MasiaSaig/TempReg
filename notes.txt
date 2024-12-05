@@ -1,1 +1,4 @@
 I2C0 on pins P0[27] and P0[28] use specialized I2C pads that support fully spec compliant fast mode, standard mode, and fast mode plus I2C
+
+I2C restart is sending 2 start signals without stop in between them.
+Initializing Pmod TMP2: Start...write 0x0 data register address -> Start...read 2 bytes of temp... Stop
