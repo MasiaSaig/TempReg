@@ -14,7 +14,7 @@ void initUART0(){
 	LPC_UART0->LCR = WORD_LENGTH_8BIT;			// disable DLAB (keeping word length to 8-bit)
 }
 
-void sendString(const char* str){
+void UARTsendString(const char* str){
 	for (int i=0; ; ++i){
 		if (str[i] == '\0') break;
 		LPC_UART0->THR = str[i];
@@ -25,9 +25,9 @@ void sendString(const char* str){
 	}
 }
 
-void sendInt(int x){
+void UARTsendInt(int x){
 	if(x<0){						// send minus, if number is lower than 0
-		sendString("-");
+		UARTsendString("-");
 		x*=-1;
 	}	
 

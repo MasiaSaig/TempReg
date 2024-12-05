@@ -5,7 +5,7 @@
 #define THRE_EMPTY_UART (1<<5)
 
 void initUART0();
-void sendString(const char* str);
-void sendInt(int x);
+void UARTsendString(const char* str);
+void UARTsendInt(int x);
 
 #endif

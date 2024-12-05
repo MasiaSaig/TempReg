@@ -187,12 +187,12 @@ int main(){
 	initUART0();
  
 	I2C_Event = 0;
-	sendString("Initializing I2C... ");
-	sendInt(EEPROM_Initialize(false));
+	UARTsendString("Initializing I2C... ");
+	UARTsendInt(EEPROM_Initialize(false));
 //	sendInt(EEPROM_Initialize2());
-	sendString("Initialization of I2C completed. ");
+	UARTsendString("Initialization of I2C completed. ");
 	convertTemperature();
-	sendInt(temperatureValue);
+	UARTsendInt(temperatureValue);
 	
 	// TODO: temporary delay (delete later)
 	uint32_t returnCode = SysTick_Config(SystemCoreClock / 10);
@@ -207,6 +207,6 @@ int main(){
 		while (I2Cdrv->GetStatus().busy);									// Wait until transfer completed
 		if (I2Cdrv->GetDataCount () != dataSize) return -1;		// Check if all data transferred
 		convertTemperature();
-		sendInt(temperatureValue);
+		UARTsendInt(temperatureValue);
 	}
 }
