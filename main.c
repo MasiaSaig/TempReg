@@ -1,9 +1,18 @@
+/*
+TODO: 
+	- check if i2c is working
+	- configure pwm 
+	- to test PWM, configure led
+	- improve timer and delay function
+*/
+
 #include "UART.h"
 #include "I2C_TMP2.h"
 #include "PWM.h"
 #include <LPC17xx.h>
 #include <PIN_LPC17xx.h>
 #include <Driver_I2C.h>
+#include <Board_LED.h>
 
 // TODO: temporary delay (delete later)
 volatile uint32_t msTicks = 0;		/* Variable to store millisecond ticks */
@@ -13,7 +22,12 @@ void SysTick_Handler(void) { msTicks++; }
 void delay(unsigned int time) { msTicks=0; while(msTicks < time ) {} }
 
 int main(){
+	LED_Initialize();
+	
 	initUART0();
+	initPWM();
+	
+	NVIC_EnableIRQ(MCPWM_IRQn);
  
 	I2C_Event = 0;
 	UARTsendString("Initializing I2C... ");
