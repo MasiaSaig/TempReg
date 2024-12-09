@@ -13,15 +13,18 @@ Microprocessor specs:
 #include "I2C_TMP2.h"
 #include "PWM.h"
 #include "timer.h"
+#include "globals.h"
 
 #include <LPC17xx.h>
 #include <PIN_LPC17xx.h>
 #include <Driver_I2C.h>
 #include <Board_LED.h>
+#include <Board_Buttons.h>
 
 
 int main(){
 	LED_Initialize();
+	Buttons_Initialize();
 	
 	initUART0();
 	initPWM();
@@ -33,15 +36,17 @@ int main(){
 	UARTsendString("Initialization of I2C completed. ");
 	convertTemperature();
 	UARTsendInt(temperatureValue);
-	
-	// TODO: temporary delay (delete later)
-	uint32_t returnCode = SysTick_Config(SystemCoreClock / 10);
-	if(returnCode != 0) { /* handle error */ }
 		
 	while(true){
-		// LPC_UART0->THR is a memory address, holding 8bit character, which is going to be send
-		// LPC_UART0->THR = 'C';										// sending char
-		// UARTsendString("AGH WFIS SW.\t");				// sending string
+		// buttons handling
+		if(Buttons_GetState() & 1) {			// KEY 2
+			++setTemperature;
+			delay(5);
+		}else if((Buttons_GetState() & 2) && (setTemperature > 0)){ 	// KEY 1
+			--setTemperature;
+			delay(5);
+		}
+		
 		delay(500);
 		I2C_Event = 0U;	// clear event
 		I2Cdrv->MasterReceive(TMP2_ADDRESS, data, dataSize, false); 
