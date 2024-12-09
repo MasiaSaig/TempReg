@@ -8,14 +8,13 @@
 #define TMP2_ADDRESS 0x4B
 #define TMP2_TEMP_ADDRESS 0x0
  
-const uint32_t dataSize = 2;
-uint8_t data[2] = {0};
-uint16_t temperatureValue;
+#define DATA_SIZE 2
+extern uint8_t data[DATA_SIZE];
  
 // I2C driver instance
-extern ARM_DRIVER_I2C            Driver_I2C0;		// 'extern' to be able to access variable, from different file
-static ARM_DRIVER_I2C *I2Cdrv = &Driver_I2C0;
-static volatile uint32_t I2C_Event;
+extern ARM_DRIVER_I2C Driver_I2C0;
+extern ARM_DRIVER_I2C *I2Cdrv;
+extern volatile uint32_t I2C_Event;
 
 int32_t TMP2_Initialize(bool pooling);
 int32_t TMP2_Read_Pool(uint16_t addr, uint8_t *buf, int32_t len);

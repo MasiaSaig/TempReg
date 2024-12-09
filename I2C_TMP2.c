@@ -1,4 +1,9 @@
 #include "I2C_TMP2.h"
+#include "globals.h"
+
+ARM_DRIVER_I2C *I2Cdrv = &Driver_I2C0;
+
+uint8_t data[DATA_SIZE] = {0};
 
 // I2C Signal Event function callback
 void I2C_SignalEvent (uint32_t event) {
@@ -15,7 +20,7 @@ void I2C_SignalEvent (uint32_t event) {
   if (event & ARM_I2C_EVENT_SLAVE_RECEIVE) { /* Slave addressed as receiver but SlaveReceive operation is not started */ }
   if (event & ARM_I2C_EVENT_SLAVE_TRANSMIT) { /* Slave addressed as transmitter but SlaveTransmit operation is not started */ }
 }
- 
+
 // Read I2C connected EEPROM (event driven example)
 int32_t TMP2_Read_Event(uint16_t addr, uint8_t *buf, uint32_t len) {
   uint8_t a[2];
@@ -44,12 +49,10 @@ int32_t TMP2_Read_Pool(uint16_t addr, uint8_t *buf, int32_t len) {
   a[1] = (uint8_t)(addr & 0xFF);
  
   I2Cdrv->MasterTransmit(TMP2_ADDRESS, a, 2, true);
- 
   while (I2Cdrv->GetStatus().busy);									// Wait until transfer completed
   if (I2Cdrv->GetDataCount() != len) return -1;			// Check if all data transferred
  
   I2Cdrv->MasterReceive(TMP2_ADDRESS, buf, len, false);
- 
   while (I2Cdrv->GetStatus().busy);									// Wait until transfer completed
   if (I2Cdrv->GetDataCount () != len) return -1;		// Check if all data transferred
  
@@ -87,8 +90,8 @@ int32_t TMP2_Initialize(bool pooling) {
 /* https://digilent.com/reference/_media/reference/pmod/pmodtmp2/pmodtmp2_rm.pdf section: Quick Start Operation */
 // Converts MSB and LSB into temperature value, represented in Celsius degrees
 void convertTemperature(){
-	temperatureValue = (data[0]<<8) | data[1];
-	temperatureValue = (temperatureValue>>3) * 0.0625;
+	currentTemperature = (data[0]<<8) | data[1];
+	currentTemperature = (currentTemperature>>3) * 0.0625;
 }
 
 
@@ -124,7 +127,7 @@ int32_t TMP2_Initialize2() {
 	while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U) {};							// Wait until transfer completed
   if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
 		
-	I2Cdrv->MasterReceive(TMP2_ADDRESS, data, dataSize, false);
+	I2Cdrv->MasterReceive(TMP2_ADDRESS, data, DATA_SIZE, false);
   while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U);								// Wait until transfer completed
   if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
  
