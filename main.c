@@ -26,8 +26,6 @@ int main(){
 	
 	initUART0();
 	initPWM();
-	
-	NVIC_EnableIRQ(MCPWM_IRQn);
  
 	I2C_Event = 0;
 	UARTsendString("Initializing I2C... ");
