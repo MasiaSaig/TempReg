@@ -2,3 +2,13 @@ I2C0 on pins P0[27] and P0[28] use specialized I2C pads that support fully spec 
 
 I2C restart is sending 2 start signals without stop in between them.
 Initializing Pmod TMP2: Start...write 0x0 data register address -> Start...read 2 bytes of temp... Stop
+
+#######################################################################################################
+Pulse Width Modulation (PWM) example:
+         period MR0
+     <------------->
+PWMTC 0  1  2  3  4 
+      _____  
+PWM1 _|   |________
+    t= 0 1 2 3 4 5 6 
+	  /MR1\ 

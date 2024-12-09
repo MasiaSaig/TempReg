@@ -1,5 +1,6 @@
 #include "UART.h"
 #include "I2C_TMP2.h"
+#include "PWM.h"
 #include <LPC17xx.h>
 #include <PIN_LPC17xx.h>
 #include <Driver_I2C.h>
