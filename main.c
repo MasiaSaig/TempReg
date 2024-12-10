@@ -33,6 +33,7 @@ Microprocessor specs:
 uint16_t currentTemperature = 0;
 uint16_t setTemperature = 25;
 uint8_t proportionalControl = 0;
+uint16_t temperatureDifference = 0;
 
 int main(){
 	// initialization
@@ -65,19 +66,29 @@ int main(){
 		I2C_Event = 0U;	// clear event
 		I2Cdrv->MasterReceive(TMP2_ADDRESS, data, DATA_SIZE, false); 
 		while (I2Cdrv->GetStatus().busy);											// Wait until transfer completed
-		if (I2Cdrv->GetDataCount () != DATA_SIZE) return -1;		// Check if all data transferred
+		if (I2Cdrv->GetDataCount () != DATA_SIZE) return -1;	// Check if all data transferred
 		convertTemperature();
 		UARTsendInt(currentTemperature);
 		
+		
+		// calculating errors and power 
+		temperatureDifference = setTemperature - currentTemperature;
+		
+		// regulating temperature
+		/*
 		if(proportionalControl){
 			// proportional 
 		}else{
+// TODO: test PWM 2-positional control
 			// 2-positional control (dwupołożeniowa)
 			if(currentTemperature > setTemperature){
 				// wyłącz grzejnik - czyli ustaw Pulse Width na zero? albo całkowicie wyłączyć PWM
+				changePulseWidth(0);
 			}else{
-				// jeśli grzejnik wyłączony, włącz go - Pulse Width na 100%, czyli całą długość period
+				// jeśli grzejnik wyłączony, włącz go - Pulse Width na całą długość period, czyli 20ms=20000us
+				changePulseWidth(20000);
 			}
 		}
+		*/
 	}
 }

@@ -16,4 +16,26 @@ PWM1 _|   |________
 	  /MR1\ 
 
 #######################################################################################################
-### Pseudocode for temperature regulation ###
+### PID ###
+	- P proportional:
+output_P = Kp * error(t)
+multiplication of amplification and error
+
+error(t) = set_value - value(t) (current value taken from sensor)
+set_value - value we want to achive, set by user
+t - current time
+Kp - constant amplification (eg. 0.1)
+
+	- I integral:
+output_I = Ki *  sum[error(t) * delta_t(t)]
+we multiply amplification_integral, by ( integral(or a sum) of all errors multiply, by their time difference )
+
+delta_t(t) = time(t) - time(t_prev)
+Ki - constant amplification (eg. 0.01)
+
+	- D Derivative
+output_D = Kd * (error(t) - error(t_prev)) / delta_t(t)
+Kd - constant amplification (eg. 0.1)
+
+	- Sum
+output = output_P + output_I + output_D
