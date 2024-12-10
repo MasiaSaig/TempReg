@@ -7,6 +7,6 @@ void initTimer();
 void resetTimer();
 
 void delay(unsigned int time_ms);
-uint16_t timestamp();
+uint32_t timestamp();
 
 #endif

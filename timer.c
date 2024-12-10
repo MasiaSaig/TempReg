@@ -22,6 +22,6 @@ void delay(unsigned int time_ms){
 //	LPC_TIM0->TCR = (1<<1);		// reset counter
 }
 
-uint16_t timestamp(){
+uint32_t timestamp(){
 	return LPC_TIM0->TCR;
 }

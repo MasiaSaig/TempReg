@@ -57,8 +57,8 @@ int main(){
 	UARTsendInt(currentTemperature);
 	
 	////// MAIN LOOP //////
-	uint16_t startTime, stopTime, deltaStartStopTime;
-	const uint16_t iterationDuration = 500; // 500ms = 0.5 second
+	uint32_t startTime, stopTime, deltaStartStopTime;
+	const uint32_t iterationDuration = 500; // 500ms = 0.5 second
 	while(true){
 		resetTimer();
 		startTime = timestamp();
