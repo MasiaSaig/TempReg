@@ -18,11 +18,12 @@ Microprocessor specs:
 	CCLK = 100Mhz and PCLK = 25Mhz
 */
 
+#include "globals.h"
 #include "UART.h"
 #include "I2C_TMP2.h"
 #include "PWM.h"
 #include "timer.h"
-#include "globals.h"
+#include "PID.h"
 
 #include <LPC17xx.h>
 #include <PIN_LPC17xx.h>
@@ -30,13 +31,17 @@ Microprocessor specs:
 #include <Board_LED.h>
 #include <Board_Buttons.h>
 
+
 uint16_t currentTemperature = 0;
 uint16_t setTemperature = 25;
 uint8_t proportionalControl = 0;
-uint16_t temperatureDifference = 0;
+uint16_t temperatureError = 0;
+
+void handleButtons();
+
 
 int main(){
-	// initialization
+	////// INITIALIZATION //////
 	LED_Initialize();
 	Buttons_Initialize();
 	
@@ -44,7 +49,6 @@ int main(){
 	initPWM();
 	
 	I2C_Event = 0;
-	
 	UARTsendString("Initializing I2C... ");
 //	UARTsendInt(TMP2_Initialize(false));
 	UARTsendInt(TMP2_Initialize2());
@@ -52,17 +56,16 @@ int main(){
 	convertTemperature();
 	UARTsendInt(currentTemperature);
 	
+	////// MAIN LOOP //////
+	uint16_t startTime, stopTime, deltaStartStopTime;
+	const uint16_t iterationDuration = 500; // 500ms = 0.5 second
 	while(true){
-		// buttons handling
-		if(Buttons_GetState() & 1) {			// KEY 2
-			++setTemperature;
-			delay(5);
-		}else if((Buttons_GetState() & 2) && (setTemperature > 0)){ 	// KEY 1
-			--setTemperature;
-			delay(5);
-		}
+		resetTimer();
+		startTime = timestamp();
 		
-		delay(500);
+//		handleButtons();
+		
+		// get temperature data, from sensor
 		I2C_Event = 0U;	// clear event
 		I2Cdrv->MasterReceive(TMP2_ADDRESS, data, DATA_SIZE, false); 
 		while (I2Cdrv->GetStatus().busy);											// Wait until transfer completed
@@ -70,25 +73,23 @@ int main(){
 		convertTemperature();
 		UARTsendInt(currentTemperature);
 		
+		// calculating temperature regulations and power
+//		temperatureRegulation();
 		
-		// calculating errors and power 
-		temperatureDifference = setTemperature - currentTemperature;
-		
-		// regulating temperature
-		/*
-		if(proportionalControl){
-			// proportional 
-		}else{
-// TODO: test PWM 2-positional control
-			// 2-positional control (dwupołożeniowa)
-			if(currentTemperature > setTemperature){
-				// wyłącz grzejnik - czyli ustaw Pulse Width na zero? albo całkowicie wyłączyć PWM
-				changePulseWidth(0);
-			}else{
-				// jeśli grzejnik wyłączony, włącz go - Pulse Width na całą długość period, czyli 20ms=20000us
-				changePulseWidth(20000);
-			}
+		stopTime = timestamp();
+		deltaStartStopTime = stopTime - startTime;
+		if(deltaStartStopTime < iterationDuration){
+			delay(iterationDuration-deltaStartStopTime);
 		}
-		*/
+	}
+}
+
+void handleButtons(){
+	if(Buttons_GetState() & 1) {		// KEY 2
+		++setTemperature;
+		delay(5);	// debouncing
+	}else if((Buttons_GetState() & 2) && (setTemperature > 0)){ 	// KEY 1
+		--setTemperature;
+		delay(5);	// debouncing
 	}
 }
