@@ -2,7 +2,7 @@
 #include <LPC17xx.h>
 #include <PIN_LPC17xx.h>
 
-void initUART0(){
+void initUART0(void){
 	/* (Chapter 8 - Table 79) */
 	PIN_Configure(0, 3, 1, 0b00, 0);	// pin = P0.3 (RxD Recive Data)
 	PIN_Configure(0, 2, 1, 0b00, 0);	// pin = P0.2 (TxD Transmit Data)
@@ -14,7 +14,7 @@ void initUART0(){
 	LPC_UART0->LCR = WORD_LENGTH_8BIT;			// disable DLAB (keeping word length to 8-bit)
 }
 
-void UARTsendString(const char* str){
+void UARTprintString(const char* str){
 	for (int i=0; ; ++i){
 		if (str[i] == '\0') break;
 		LPC_UART0->THR = str[i];
@@ -25,9 +25,9 @@ void UARTsendString(const char* str){
 	}
 }
 
-void UARTsendInt(int x){
+void UARTprintInt(int x){
 	if(x<0){						// send minus, if number is lower than 0
-		UARTsendString("-");
+		UARTprintString("-");
 		x*=-1;
 	}	
 

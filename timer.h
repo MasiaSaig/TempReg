@@ -3,10 +3,10 @@
 
 #include <LPC17xx.h>
 
-void initTimer();
-void resetTimer();
+void initTimer(void);
 
+void resetTimer(void);
 void delay(unsigned int time_ms);
-uint32_t timestamp();
+uint32_t timestamp(void);
 
 #endif

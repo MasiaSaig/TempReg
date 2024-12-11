@@ -12,6 +12,7 @@ TODO:
 (optional)
 	- implement rest of PID functionallity
 	- set watchdog
+	- refactor whole code, to use events instead of while(true) loop
 
 	
 Microprocessor specs:
@@ -33,12 +34,11 @@ Microprocessor specs:
 
 
 uint16_t currentTemperature = 0;
-uint16_t setTemperature = 25;
+uint16_t setTemperature = 35;
 uint8_t proportionalControl = 0;
 uint16_t temperatureError = 0;
 
 void handleButtons();
-
 
 int main(){
 	////// INITIALIZATION //////
@@ -47,38 +47,35 @@ int main(){
 	
 	initUART0();
 	initPWM();
+	initTimer();
 	
 	I2C_Event = 0;
-	UARTsendString("Initializing I2C... ");
+	UARTprintString("Initializing I2C... \n");
 //	UARTsendInt(TMP2_Initialize(false));
-	UARTsendInt(TMP2_Initialize2());
-	UARTsendString("Initialization of I2C completed. ");
-	convertTemperature();
-	UARTsendInt(currentTemperature);
+	UARTprintInt(TMP2_Initialize2());
+	UARTprintString("\nInitialization of I2C completed. ");
 	
 	////// MAIN LOOP //////
 	uint32_t startTime, stopTime, deltaStartStopTime;
 	const uint32_t iterationDuration = 500; // 500ms = 0.5 second
 	while(true){
-		resetTimer();
-		startTime = timestamp();
+		handleButtons();
 		
-//		handleButtons();
-		
-		// get temperature data, from sensor
-		I2C_Event = 0U;	// clear event
-		I2Cdrv->MasterReceive(TMP2_ADDRESS, data, DATA_SIZE, false); 
-		while (I2Cdrv->GetStatus().busy);											// Wait until transfer completed
-		if (I2Cdrv->GetDataCount () != DATA_SIZE) return -1;	// Check if all data transferred
-		convertTemperature();
-		UARTsendInt(currentTemperature);
+		readTemperature();
+		UARTprintInt(currentTemperature);
 		
 		// calculating temperature regulations and power
 //		temperatureRegulation();
 		
+		
+		// TODO: test timer
+		resetTimer();
+		startTime = timestamp();
+		delay(iterationDuration);
 		stopTime = timestamp();
 		deltaStartStopTime = stopTime - startTime;
 		if(deltaStartStopTime < iterationDuration){
+			UARTprintInt(iterationDuration-deltaStartStopTime);
 			delay(iterationDuration-deltaStartStopTime);
 		}
 	}

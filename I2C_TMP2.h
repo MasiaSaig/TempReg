@@ -3,30 +3,38 @@
 
 #include <Driver_I2C.h>
 
-// address is set by selecting jumper blocks on board
+// 7-bit address is set by selecting jumper blocks on board
 // https://digilent.com/reference/pmod/pmodtmp2/reference-manual
-#define TMP2_ADDRESS 0x4B
-#define TMP2_TEMP_ADDRESS 0x0
+#define TMP2_ADDRESS 0x4B				//!< Address(7-bit) of a slave TMP2, with both jump pins(JP1/2) open.
+#define TMP2_TEMP_ADDRESS 0x00	//!< Address of data(MSb) inside TMP2.
  
-#define DATA_SIZE 2
-extern uint8_t data[DATA_SIZE];
+#define TEMP_DATA_SIZE 2
+extern uint8_t tempData[TEMP_DATA_SIZE];	//!< Temperature data, holding bits(MSb, LSb) taken from TMP2.
  
 // I2C driver instance
 extern ARM_DRIVER_I2C Driver_I2C0;
 extern ARM_DRIVER_I2C *I2Cdrv;
 extern volatile uint32_t I2C_Event;
 
-int32_t TMP2_Initialize(bool pooling);
-int32_t TMP2_Read_Pool(uint16_t addr, uint8_t *buf, int32_t len);
-int32_t TMP2_Read_Event(uint16_t addr, uint8_t *buf, uint32_t len);
+// current temperature, captured by sensor
+extern uint16_t currentTemperature;
 
-void I2C_SignalEvent (uint32_t event);
-void convertTemperature();
+/*! Initialize TMP2 to use I2C protocot. */
+int32_t TMP2_Initialize(void);
+//int32_t TMP2_Read_Pool(uint16_t addr, uint8_t *buf, int32_t len);
+/*! Function used in initialization, which sends address of slave and reads data(temperature). */
+int32_t TMP2_Read_Event(uint16_t addr, uint8_t *buf, uint32_t len);
+/*! [currently unnecessary] Read events from TMP2 and handles them. */
+void I2C_SignalEvent(uint32_t event);
+
+/*! Read temperature data, from TMP2 and convert it to Celsius degrees. */
+bool readTemperature(void);
+/*! Convert temperature data from TMP2 into Celsius degrees. */
+void convertTemperature(void);
 
 
 
 // TODO: DO SPRAWDZENIA
-int32_t TMP2_Initialize2();
-int32_t TMP2_Read_Event_NoAdr(uint8_t *buf, uint32_t len);
+int32_t TMP2_Initialize2(void);
 
 #endif
