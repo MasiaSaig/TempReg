@@ -9,9 +9,9 @@ void initPWM(void){
 	// Table 40.
 	LPC_PWM1->PCR = PWM_SINGLE_EDGE;
 	// TC increments, every 1 mili second
-	LPC_PWM1->PR 	= 25000000/1000 - 1; // PR = (25MHz * 1ms) - 1 = (PCLK * PWM_res) - 1
-	LPC_PWM1->MR0 = 20000; 	// setting period to 20000us = 20ms 
-	LPC_PWM1->MR1 = 10000;	// setting pulse duration(width) to 10ms - setting PWM frequency to 1kHz
+	LPC_PWM1->PR  = 25000000/1000 - 1; // PR = (25MHz * 1ms) - 1 = (PCLK * PWM_res) - 1
+	LPC_PWM1->MR0 = 1000000; 	// setting period to 1000000us = 1000ms = 1s 
+	LPC_PWM1->MR1 =  500000;	// setting pulse duration(width) to 0.5s
 	
 	LPC_PWM1->MCR = (1<<1);						// reset PWM TC on PWM1MR0 match
 	LPC_PWM1->LER = (1<<0) | (1<<1);	// update MR0 and MR1, without it changes wont be applied

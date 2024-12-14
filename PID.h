@@ -3,6 +3,8 @@
 
 #include <LPC17xx.h>
 
+#define LIMIT 1000000
+
 extern float Amplification_P;
 extern float Amplification_I;
 extern float Amplification_D;

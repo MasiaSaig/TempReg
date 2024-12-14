@@ -17,7 +17,7 @@ PWM1 _|   |________
 
 #######################################################################################################
 ### PID ###
-	- P proportional:
+	- P proportional - proportional gain/proportional band(PB), usually measured in % 100/PB:
 output_P = Kp * error(t)
 multiplication of amplification and error
 
@@ -26,16 +26,21 @@ set_value - value we want to achive, set by user
 t - current time
 Kp - constant amplification (eg. 0.1)
 
-	- I integral:
+	- I integral - Ki (repeat / second) = 1 / Ti (Ti second/ repeat):
 output_I = Ki *  sum[error(t) * delta_t(t)]
 we multiply amplification_integral, by ( integral(or a sum) of all errors multiply, by their time difference )
 
 delta_t(t) = time(t) - time(t_prev)
 Ki - constant amplification (eg. 0.01)
 
-	- D Derivative
+	- D Derivative - predicting change, used with signals without noise
 output_D = Kd * (error(t) - error(t_prev)) / delta_t(t)
 Kd - constant amplification (eg. 0.1)
 
 	- Sum
 output = output_P + output_I + output_D
+
+
+How to adjust PID:
+If process changes quickly, start with low gain (P small about 0.1) and adjust reset accordingly (1 < I < 10).
+If process changes slowly, start with higher gain (2 < P < 8) and low reset (0.05 < I < 0.5).

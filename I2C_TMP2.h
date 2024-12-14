@@ -27,7 +27,9 @@ int32_t TMP2_Read_Event(uint16_t addr, uint8_t *buf, uint32_t len);
 /*! [currently unnecessary] Read events from TMP2 and handles them. */
 void I2C_SignalEvent(uint32_t event);
 
-/*! Read temperature data, from TMP2 and convert it to Celsius degrees. */
+/*! Read temperature data, from TMP2 and convert it to Celsius degrees.
+ * @return False if not all data were transfered.
+ */
 bool readTemperature(void);
 /*! Convert temperature data from TMP2 into Celsius degrees. */
 void convertTemperature(void);

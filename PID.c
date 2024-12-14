@@ -1,9 +1,10 @@
 #include "PID.h"
 #include "I2C_TMP2.h"
 
-float Amplification_P = 0.1;
-float Amplification_I = 0.01;
-float Amplification_D = 0.1;
+// TODO: tune amplifications
+float Amplification_P = 1; //0.1;
+float Amplification_I = 0; //0.01;
+float Amplification_D = 0; //0.1;
 
 uint32_t deltaTime = 500;
 int32_t sumTemperatureError = 0;
@@ -18,8 +19,8 @@ uint16_t calculatePID(void){
 //	deltaTime = curTime - prevTime;
 	sumTemperatureError += temperatureError*deltaTime;
 	// boundary
-	if(sumTemperatureError >  20000) { sumTemperatureError =  20000; }
-	if(sumTemperatureError < -20000) { sumTemperatureError = -20000; }
+	if(sumTemperatureError >  LIMIT) { sumTemperatureError =  LIMIT; }
+	if(sumTemperatureError < -LIMIT) { sumTemperatureError = -LIMIT; }
 	
 	// P - Proportional
 	output += Amplification_P * temperatureError;
@@ -30,5 +31,13 @@ uint16_t calculatePID(void){
 	// D - Derivative
 	output += Amplification_D * (temperatureError - temperatureErrorPrev) / deltaTime;
 	
+	// normalize output... so value between 0 - 1 000 000 ? for duration of PWM ?? not sure
+	
+
+	// TODO: oblicz moc, czyli U / czas
+	// P_on = (V_cc * V_cc) / R_heater
+	// P_avg = D * P_on 	where D is value between 0-1, that is time when heater is ON during 1 second 
+	// (in our example it should be D=0.5)
+
 	return output;
 }

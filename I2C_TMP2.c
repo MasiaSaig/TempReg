@@ -11,16 +11,19 @@ void I2C_SignalEvent(uint32_t event) {
   // Optionally, user can define specific actions for an event
   if (event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) { /* Less data was transferred than requested */ }
   if (event & ARM_I2C_EVENT_TRANSFER_DONE) { /* Transfer or receive is finished */ }
-  if (event & ARM_I2C_EVENT_ADDRESS_NACK) { /* Slave address was not acknowledged */ }
+  if (event & ARM_I2C_EVENT_ADDRESS_NACK) { 
+    // which means, sensor was unplugged... right? it should be :| 
+    UARTprintString("Slave address was not acknowledged"); 
+  }
   if (event & ARM_I2C_EVENT_ARBITRATION_LOST) { /* Master lost bus arbitration */ } 
-  if (event & ARM_I2C_EVENT_BUS_ERROR) { /* invalid start/stop position detected */ }
+  if (event & ARM_I2C_EVENT_BUS_ERROR) { UARTprintString("invalid start/stop position detected"); }
   if (event & ARM_I2C_EVENT_BUS_CLEAR) { /* Bus clear operation completed */ }
   if (event & ARM_I2C_EVENT_GENERAL_CALL) { /* Slave was addressed with a general call address */ }
   if (event & ARM_I2C_EVENT_SLAVE_RECEIVE) { /* Slave addressed as receiver but SlaveReceive operation is not started */ }
   if (event & ARM_I2C_EVENT_SLAVE_TRANSMIT) { /* Slave addressed as transmitter but SlaveTransmit operation is not started */ }
 }
 
-int32_t TMP2_Read_Event(uint16_t addr, uint8_t *buf, uint32_t len) {
+/*int32_t TMP2_Read_Event(uint16_t addr, uint8_t *buf, uint32_t len) {
   uint8_t a[2];
   a[0] = (uint8_t)(addr >> 8);
   a[1] = (uint8_t)(addr & 0xFF);
@@ -38,7 +41,7 @@ int32_t TMP2_Read_Event(uint16_t addr, uint8_t *buf, uint32_t len) {
   if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
  
   return 0;
-}
+}*/
  
 // Read I2C connected EEPROM (pooling example)
 /*int32_t TMP2_Read_Pool(uint16_t addr, uint8_t *buf, int32_t len) {
@@ -58,7 +61,7 @@ int32_t TMP2_Read_Event(uint16_t addr, uint8_t *buf, uint32_t len) {
 }*/
  
 // Initialize I2C connected EEPROM
-int32_t TMP2_Initialize(void) {
+/*int32_t TMP2_Initialize(void) {
   int32_t status;
 	uint8_t val;
  
@@ -71,7 +74,7 @@ int32_t TMP2_Initialize(void) {
   status = TMP2_Read_Event(0x0, &val, 1);
 
   return (status);
-}
+}*/
 
 /* https://digilent.com/reference/_media/reference/pmod/pmodtmp2/pmodtmp2_rm.pdf section: Quick Start Operation */
 // Converts MSB and LSB into temperature value, represented in Celsius degrees
@@ -81,7 +84,6 @@ void convertTemperature(void){
 }
 
 bool readTemperature(void){
-	// get temperature data, from sensor
 	I2C_Event = 0U;	// clear event
 	I2Cdrv->MasterReceive(TMP2_ADDRESS, tempData, TEMP_DATA_SIZE, false); 
 	while (I2Cdrv->GetStatus().busy);											// Wait until transfer completed
@@ -89,9 +91,6 @@ bool readTemperature(void){
 	convertTemperature();
 	return true;
 }
-
-
-
 
 int32_t TMP2_Initialize2(void) {
   I2Cdrv->Initialize(I2C_SignalEvent);

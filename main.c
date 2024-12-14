@@ -9,10 +9,12 @@ TODO:
 	- implement changing between temperature regulation modes
 	- test temperature regulation
 	- calculating power consumption by heater	
+	- test I2C events on sensor unplugging
 (optional)
 	- implement rest of PID functionallity
 	- set watchdog
 	- refactor whole code, to use events instead of while(true) loop
+	- user changing PID amplifications and ?limit?
 
 	
 Microprocessor specs:
@@ -69,7 +71,7 @@ int main(){
 		
 		
 		// TODO: test timer
-		resetTimer();
+		/*resetTimer();
 		startTime = timestamp();
 		delay(iterationDuration);
 		stopTime = timestamp();
@@ -77,7 +79,11 @@ int main(){
 		if(deltaStartStopTime < iterationDuration){
 			UARTprintInt(iterationDuration-deltaStartStopTime);
 			delay(iterationDuration-deltaStartStopTime);
-		}
+		}*/
+
+		// TODO: test PWM and PID
+		/* changePulseWidth(5000);
+		 changePulseWidth(15000);*/
 	}
 }
 
