@@ -2,9 +2,9 @@
 #include "I2C_TMP2.h"
 
 // TODO: tune amplifications
-float Amplification_P = 1; //0.1;
-float Amplification_I = 0; //0.01;
-float Amplification_D = 0; //0.1;
+float Amplification_P = 1.0; //0.1;
+float Amplification_I = 0.0; //0.01;
+float Amplification_D = 0.0; //0.1;
 
 const uint32_t deltaTime_us = 50000; // == 50 ms
 int32_t sumTemperatureError = 0;
@@ -12,7 +12,7 @@ int32_t sumTemperatureError = 0;
 // TODO: calibrate, propert Amplification values
 uint16_t calculatePID(void){
 	uint16_t output = 0;
-	uint16_t temperatureErrorPrev = temperatureError;
+	int16_t temperatureErrorPrev = temperatureError;
 	temperatureError = setTemperature - currentTemperature;
 	// TODO: set timings on retriving temperature data from sensor on constant itervals, 
 	// if not, calculate time difference between retriving data

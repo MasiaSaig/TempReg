@@ -10,6 +10,7 @@ TODO:
 	- test temperature regulation
 	- calculating power consumption by heater	
 	- test I2C events on sensor unplugging
+	- wybierz jedną czcionke w asciiLib.c, asciiLib.h
 (optional)
 	- implement rest of PID functionallity
 	- set watchdog
@@ -37,7 +38,7 @@ Microprocessor specs:
 uint16_t currentTemperature = 0;
 uint16_t setTemperature = 35;
 uint8_t PIDControl = 0;
-uint16_t temperatureError = 0;
+int16_t temperatureError = 0;
 
 void handleButtons();
 
@@ -102,8 +103,10 @@ int main(){
 
 void handleButtons(){
 	if(Buttons_GetState() & 1) {		// KEY 2
-		++setTemperature;
+		if(setTemperature <= MAX_TEMPERATURE)
+			++setTemperature;
 	}else if((Buttons_GetState() & 2) && (setTemperature > 0)){ 	// KEY 1
-		--setTemperature;
+		if(setTemperature >= MIN_TEMPERATURE)
+			--setTemperature;
 	}
 }
