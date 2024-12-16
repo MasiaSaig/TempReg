@@ -1,4 +1,5 @@
 #include "I2C_TMP2.h"
+#include "UART.h"
 
 ARM_DRIVER_I2C *I2Cdrv = &Driver_I2C0;
 volatile uint32_t I2C_Event = 0U;

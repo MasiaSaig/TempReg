@@ -1,4 +1,4 @@
-#include "PID.h"
+#include "tempRegulation.h"
 #include "I2C_TMP2.h"
 
 // TODO: tune amplifications
@@ -6,7 +6,7 @@ float Amplification_P = 1; //0.1;
 float Amplification_I = 0; //0.01;
 float Amplification_D = 0; //0.1;
 
-uint32_t deltaTime = 500;
+const uint32_t deltaTime_us = 50000; // == 50 ms
 int32_t sumTemperatureError = 0;
 
 // TODO: calibrate, propert Amplification values
@@ -17,7 +17,7 @@ uint16_t calculatePID(void){
 	// TODO: set timings on retriving temperature data from sensor on constant itervals, 
 	// if not, calculate time difference between retriving data
 //	deltaTime = curTime - prevTime;
-	sumTemperatureError += temperatureError*deltaTime;
+	sumTemperatureError += temperatureError*deltaTime_us;
 	// boundary
 	if(sumTemperatureError >  LIMIT) { sumTemperatureError =  LIMIT; }
 	if(sumTemperatureError < -LIMIT) { sumTemperatureError = -LIMIT; }
@@ -29,10 +29,9 @@ uint16_t calculatePID(void){
 	output += Amplification_I * sumTemperatureError;
 	
 	// D - Derivative
-	output += Amplification_D * (temperatureError - temperatureErrorPrev) / deltaTime;
+	output += Amplification_D * (temperatureError - temperatureErrorPrev) / deltaTime_us;
 	
-	// normalize output... so value between 0 - 1 000 000 ? for duration of PWM ?? not sure
-	
+	// TODO: normalize output... so value between 0 - 1 000 000 ? for pulse duration of PWM ?? not sure
 
 	// TODO: oblicz moc, czyli U / czas
 	// P_on = (V_cc * V_cc) / R_heater
@@ -40,4 +39,8 @@ uint16_t calculatePID(void){
 	// (in our example it should be D=0.5)
 
 	return output;
+}
+
+void twoPositionalControl(void){
+	
 }

@@ -21,12 +21,11 @@ Microprocessor specs:
 	CCLK = 100Mhz and PCLK = 25Mhz
 */
 
-#include "globals.h"
 #include "UART.h"
 #include "I2C_TMP2.h"
 #include "PWM.h"
 #include "timer.h"
-#include "PID.h"
+#include "tempRegulation.h"
 
 #include <LPC17xx.h>
 #include <PIN_LPC17xx.h>
@@ -37,7 +36,7 @@ Microprocessor specs:
 
 uint16_t currentTemperature = 0;
 uint16_t setTemperature = 35;
-uint8_t proportionalControl = 0;
+uint8_t PIDControl = 0;
 uint16_t temperatureError = 0;
 
 void handleButtons();
@@ -58,17 +57,31 @@ int main(){
 	UARTprintString("\nInitialization of I2C completed. ");
 	
 	////// MAIN LOOP //////
-	uint32_t startTime, stopTime, deltaStartStopTime;
-	const uint32_t iterationDuration = 500; // 500ms = 0.5 second
+//	uint32_t startTime, stopTime, deltaStartStopTime;
+//	const uint32_t iterationDuration = 500; // 500ms = 0.5 second
 	while(true){
-		handleButtons();
-		
-		readTemperature();
-		UARTprintInt(currentTemperature);
-		
-		// calculating temperature regulations and power
-//		temperatureRegulation();
-		
+		if(timerStatus.f1ms){
+			readTemperature();
+			UARTprintInt(currentTemperature);
+			timerStatus.f1ms = 0;		// !MUST reset 1ms flag!
+		}
+		if(timerStatus.f5ms){
+			// debouncing handles automatically, since buttons can be pressed only every 5ms
+				handleButtons();
+		}
+		if(timerStatus.f50ms){
+			// calculating temperature regulations and power
+			if(PIDControl == 1)
+				calculatePID();
+			else
+				twoPositionalControl();
+		}
+		if(timerStatus.f500ms){
+			// update screen
+		}
+		if(timerStatus.f1s){
+			// idk... 
+		}
 		
 		// TODO: test timer
 		/*resetTimer();
@@ -90,9 +103,7 @@ int main(){
 void handleButtons(){
 	if(Buttons_GetState() & 1) {		// KEY 2
 		++setTemperature;
-		delay(5);	// debouncing
 	}else if((Buttons_GetState() & 2) && (setTemperature > 0)){ 	// KEY 1
 		--setTemperature;
-		delay(5);	// debouncing
 	}
 }

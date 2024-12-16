@@ -3,10 +3,9 @@
 #include <PIN_LPC17xx.h>
 
 void initPWM(void){
-	// Table 82.
+	/* Table 82. */
 	PIN_Configure(1, 18, 0b10, 0, 0);
-//	LPC_PINCON->PINSEL3 = (1<<5);
-	// Table 40.
+	/* Table 40 */
 	LPC_PWM1->PCR = PWM_SINGLE_EDGE;
 	// TC increments, every 1 mili second
 	LPC_PWM1->PR  = 25000000/1000 - 1; // PR = (25MHz * 1ms) - 1 = (PCLK * PWM_res) - 1
