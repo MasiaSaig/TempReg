@@ -35,8 +35,9 @@ uint32_t timestamp(void){
 }
 */
 
-void TIMER0_IRQHandler(){
-	timerStatus.bits = 0;			// reset all flags to zero
+void TIMER0_IRQHandler(void){
+	// TODO: check if reseting all flags like that, will work (if statements in main loop might not run)
+//	timerStatus.bits = 0;			// reset all flags to zero
 	timerStatus.f1ms = 1;						// set flag every milisecond
 	if((LPC_TIM0->TC & 5)   == 0)
 		timerStatus.f5ms = 1;

@@ -1,6 +1,5 @@
 #include "LCD_screen.h"
 #include "Open1768_LCD.h"
-#include "LCD_ILI9325.h"
 #include "asciiLib.h"
 
 void initLCDScreen(void){
@@ -9,11 +8,18 @@ void initLCDScreen(void){
 }
 
 void drawLetter(uint16_t x, uint16_t y, unsigned char letter, uint16_t fontColor, uint16_t backgroundColor){
-	// ASCII 16x8 - 16 wierszy, 8 kolumn
-	// znak/symbol ASCII jest zapisany w tablicy 16 wartosci,
-	// gdzie kazda wartosc ma 8 bit�w
-	// bit 1 - oznacza pixel znaku (bialy kolor)
-	// bit 0 - oznacza pixel tla 	 (czarny kolor)
+	// ASCII 16x8 - 16 rows, 8 columns
+	// ASCII sign written in table of 16 values, where every value consists of 8 bits.
+	// bit 1 == letter pixel (white) 
+	// bit 0 == background pixel (black)
+	/*
+			11111111
+			10000001
+			10000001
+			...					==	0
+			10000001
+			11111111
+	*/
 	unsigned char buffer[16];
 	// skopiowanie danych litery wybranej czcionki 1 (mozna wybrac tez 0)
 	GetASCIICode(1,buffer, letter);
@@ -45,4 +51,14 @@ void drawNumber(uint16_t x, uint16_t y, int16_t number, uint16_t fontColor, uint
 	for(;idx>=0;--idx) { numberString[idx] = ' '; }
 	numberString[4]='\0';	// add string termination
 	drawString(x, y, numberString, fontColor, backgroundColor);
+}
+
+void setBackground(uint16_t backgroundColor){
+	lcdSetCursor(0,0);
+	// rozbicie lcdWriteRed(), na lcdWriteIndex(data_ram) oraz lcdWriteData(data)
+	lcdWriteIndex(DATA_RAM);
+	uint32_t pixelsNum = LCD_MAX_X*LCD_MAX_Y;
+	for(uint32_t i=0; i<pixelsNum; ++i){
+		lcdWriteData(backgroundColor);
+	}
 }

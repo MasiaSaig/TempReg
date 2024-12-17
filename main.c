@@ -27,6 +27,7 @@ Microprocessor specs:
 #include "PWM.h"
 #include "timer.h"
 #include "tempRegulation.h"
+#include "LCD_screen.h"
 
 #include <LPC17xx.h>
 #include <PIN_LPC17xx.h>
@@ -34,11 +35,7 @@ Microprocessor specs:
 #include <Board_LED.h>
 #include <Board_Buttons.h>
 
-
-uint16_t currentTemperature = 0;
-uint16_t setTemperature = 35;
-uint8_t PIDControl = 0;
-int16_t temperatureError = 0;
+typedef unsigned char* uchar_p;
 
 void handleButtons();
 
@@ -50,6 +47,7 @@ int main(){
 	initUART0();
 	initPWM();
 	initTimer();
+	initLCDScreen();
 	
 	I2C_Event = 0;
 	UARTprintString("Initializing I2C... \n");
@@ -57,31 +55,53 @@ int main(){
 	UARTprintInt(TMP2_Initialize2());
 	UARTprintString("\nInitialization of I2C completed. ");
 	
+	/* prepare screen background and unchangable letters */
+	/*
+	setBackground(DEFAULT_BG_COLOR);
+	drawString(8,8,  (uchar_p)"Temperature: " 			, DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawString(8,32, (uchar_p)"Set Temperature: "		, DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawString(8,56, (uchar_p)"Temperature Error: " , DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawString(8,80, (uchar_p)"Power: "			, DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	*/
+	
 	////// MAIN LOOP //////
-//	uint32_t startTime, stopTime, deltaStartStopTime;
-//	const uint32_t iterationDuration = 500; // 500ms = 0.5 second
 	while(true){
 		if(timerStatus.f1ms){
-			readTemperature();
-			UARTprintInt(currentTemperature);
 			timerStatus.f1ms = 0;		// !MUST reset 1ms flag!
 		}
 		if(timerStatus.f5ms){
+			/* handling input buttons */
 			// debouncing handles automatically, since buttons can be pressed only every 5ms
-				handleButtons();
+			/*
+			handleButtons();
+			*/
+			timerStatus.f5ms = 0;
 		}
 		if(timerStatus.f50ms){
+			timerStatus.f50ms = 0;
+		}
+		if(timerStatus.f500ms){
+			/* update screen */
+			/*
+			drawNumber(112,8,  currentTemperature,	DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+			drawNumber(144,32, setTemperature,			DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+			drawNumber(160,56, temperatureError,		DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+			drawNumber(64,80,  heaterPower,					DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+			*/
+			timerStatus.f500ms = 0;
+		}
+		if(timerStatus.f1s){
+			/* main PID functionality, reading and calculating temperature */
+			readTemperature();
+			UARTprintInt(currentTemperature);
 			// calculating temperature regulations and power
 			if(PIDControl == 1)
 				calculatePID();
 			else
 				twoPositionalControl();
-		}
-		if(timerStatus.f500ms){
-			// update screen
-		}
-		if(timerStatus.f1s){
-			// idk... 
+			
+			
+			timerStatus.f1s = 0;
 		}
 		
 		// TODO: test timer

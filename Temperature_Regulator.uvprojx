@@ -390,59 +390,9 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>UART.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\UART.h</FilePath>
-            </File>
-            <File>
-              <FileName>UART.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\UART.c</FilePath>
-            </File>
-            <File>
-              <FileName>notes.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\notes.txt</FilePath>
-            </File>
-            <File>
-              <FileName>I2C_TMP2.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\I2C_TMP2.h</FilePath>
-            </File>
-            <File>
               <FileName>I2C_TMP2.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\I2C_TMP2.c</FilePath>
-            </File>
-            <File>
-              <FileName>PWM.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\PWM.h</FilePath>
-            </File>
-            <File>
-              <FileName>PWM.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\PWM.c</FilePath>
-            </File>
-            <File>
-              <FileName>timer.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\timer.h</FilePath>
-            </File>
-            <File>
-              <FileName>timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\timer.c</FilePath>
-            </File>
-            <File>
-              <FileName>tempRegulation.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\tempRegulation.c</FilePath>
-            </File>
-            <File>
-              <FileName>tempRegulation.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\tempRegulation.h</FilePath>
             </File>
             <File>
               <FileName>LCD_screen.c</FileName>
@@ -450,9 +400,24 @@
               <FilePath>.\LCD_screen.c</FilePath>
             </File>
             <File>
-              <FileName>LCD_screen.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\LCD_screen.h</FilePath>
+              <FileName>PWM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\PWM.c</FilePath>
+            </File>
+            <File>
+              <FileName>tempRegulation.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\tempRegulation.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>UART.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\UART.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -488,6 +453,51 @@
               <FileName>Open1768_LCD.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Open1768_LCD.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Headers</GroupName>
+          <Files>
+            <File>
+              <FileName>I2C_TMP2.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\I2C_TMP2.h</FilePath>
+            </File>
+            <File>
+              <FileName>LCD_screen.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\LCD_screen.h</FilePath>
+            </File>
+            <File>
+              <FileName>PWM.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\PWM.h</FilePath>
+            </File>
+            <File>
+              <FileName>tempRegulation.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tempRegulation.h</FilePath>
+            </File>
+            <File>
+              <FileName>timer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\timer.h</FilePath>
+            </File>
+            <File>
+              <FileName>UART.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\UART.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>notes</GroupName>
+          <Files>
+            <File>
+              <FileName>notes.txt</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\notes.txt</FilePath>
             </File>
           </Files>
         </Group>
