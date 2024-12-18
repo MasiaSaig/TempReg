@@ -14,17 +14,16 @@ extern uint8_t tempData[TEMP_DATA_SIZE];	//!< Temperature data, holding bits(MSb
 // I2C driver instance
 extern ARM_DRIVER_I2C Driver_I2C0;
 extern ARM_DRIVER_I2C *I2Cdrv;
-extern volatile uint32_t I2C_Event;
+extern volatile uint32_t I2C_Event;		//!< Event from I2C protocol, which is handled in I2C_SignalEvent() function/
 
-// current temperature, captured by sensor
-extern uint16_t currentTemperature;
+extern uint16_t currentTemperature;		//!< Current temperature, read by sensor.
 
 /*! Initialize TMP2 to use I2C protocot. */
 int32_t TMP2_Initialize(void);
 //int32_t TMP2_Read_Pool(uint16_t addr, uint8_t *buf, int32_t len);
 /*! Function used in initialization, which sends address of slave and reads data(temperature). */
 int32_t TMP2_Read_Event(uint16_t addr, uint8_t *buf, uint32_t len);
-/*! [currently unnecessary] Read events from TMP2 and handles them. */
+/*! Read events from TMP2 and handles them. */
 void I2C_SignalEvent(uint32_t event);
 
 /*! Read temperature data, from TMP2 and convert it to Celsius degrees.
@@ -32,11 +31,11 @@ void I2C_SignalEvent(uint32_t event);
  */
 bool readTemperature(void);
 /*! Convert temperature data from TMP2 into Celsius degrees. */
-void convertTemperature(void);
+inline void convertTemperature(void);
 
 
 
 // TODO: DO SPRAWDZENIA
-int32_t TMP2_Initialize2(void);
+//int32_t TMP2_Initialize2(void);
 
 #endif

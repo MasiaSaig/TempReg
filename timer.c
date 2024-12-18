@@ -9,46 +9,31 @@ void initTimer(void){
 	LPC_TIM0->CTCR = 0x0;
 	LPC_TIM0->PR = 25000-1;		// TC increments every milisecond
 														// [25MHz / s] = 1000 => [25MHz / 1000] = 25000Hz = s
-	LPC_TIM0->MCR = (1<<0);							// if TC == MR0, generate interrupt
-	LPC_TIM0->MCR |= (1<<3) | (1<<4);		// if TC == MR1, generate interrupt and reset timer
+	LPC_TIM0->MCR = (1<<0) | (1<<1);		// if TC == MR0, generate interrupt
 	LPC_TIM0->MR0 = 1;
-	LPC_TIM0->MR1 = 1000;
 	LPC_TIM0->TCR = (1<<0);		// enable TC and PC counting
+	
+	NVIC_EnableIRQ(TIMER0_IRQn);
 }
 
-/*
-void resetTimer(void){
-	LPC_TIM0->TCR = (1<<1);		// reset counter
-	LPC_TIM0->TCR = (1<<0);		// start counting
-}
-
-void delay(unsigned int time_ms){
-//	LPC_TIM0->TCR = (1<<1);		// reset counter
-//	LPC_TIM0->TCR = (1<<0);		// start counting
-	const uint32_t timeAfterDelay = LPC_TIM0->TC + time_ms;
-	while(LPC_TIM0->TC < timeAfterDelay) {}
-//	LPC_TIM0->TCR = (1<<1);		// reset counter
-}
-
-uint32_t timestamp(void){
-	return LPC_TIM0->TC;
-}
-*/
-
+uint16_t tick = 0;
 void TIMER0_IRQHandler(void){
 	// TODO: check if reseting all flags like that, will work (if statements in main loop might not run)
 //	timerStatus.bits = 0;			// reset all flags to zero
+	++tick;
 	timerStatus.f1ms = 1;						// set flag every milisecond
-	if((LPC_TIM0->TC & 5)   == 0)
+	if((tick % 5) == 0)
 		timerStatus.f5ms = 1;
-	if((LPC_TIM0->TC & 50)  == 0)		// set flag every 50 miliseconds
+	if((tick % 50) == 0)		// set flag every 50 miliseconds
 		timerStatus.f50ms = 1;
-	if((LPC_TIM0->TC & 500) == 0)	// set flag every 500 miliseconds
+	if((tick % 250) == 0)
+		timerStatus.f250ms = 1;
+	if((tick % 500) == 0)	// set flag every 500 miliseconds
 		timerStatus.f500ms = 1;
 	
 	LPC_TIM0->IR |= 1;	// reset MR0 interrupt
-	if((LPC_TIM0->IR & 0b10) == 0b10){	// if MR1 interrupt
+	if((tick % 1000) == 0){
 		timerStatus.f1s = 1;
-		LPC_TIM0->IR |= (1 << 1);	// reset MR1 interrupt
+		tick = 0;
 	}
 }
