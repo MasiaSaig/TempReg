@@ -16,9 +16,15 @@ typedef union{
 	uint8_t bits;
 } timerFlags;
 
-// TODO: check if static would work
-extern timerFlags timerStatus;
+extern timerFlags timerStatus;  //!< 8-bit union/struct containing time intervals flags of timer.
 
+/*! Initialization of timer, TIM0 
+ *
+ * Initializes timer TIM0 to generate interrupt every 1 milisecond. 
+ * Within interrupt handling function, it changes according timerStatus flags.
+ *
+ * @return void
+ */
 void initTimer(void);
 
 #endif

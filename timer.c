@@ -16,24 +16,23 @@ void initTimer(void){
 	NVIC_EnableIRQ(TIMER0_IRQn);
 }
 
-uint16_t tick = 0;
+uint8_t tick = 0;
 void TIMER0_IRQHandler(void){
 	// TODO: check if reseting all flags like that, will work (if statements in main loop might not run)
 //	timerStatus.bits = 0;			// reset all flags to zero
 	++tick;
-	timerStatus.f1ms = 1;						// set flag every milisecond
-	if((tick % 5) == 0)
+	timerStatus.f1ms = 1;       // set flag every milisecond
+	if((tick % 5) == 0)         // set flag every 5 miliseconds
 		timerStatus.f5ms = 1;
-	if((tick % 50) == 0)		// set flag every 50 miliseconds
+	if((tick % 50) == 0)		    // set flag every 50 miliseconds
 		timerStatus.f50ms = 1;
-	if((tick % 250) == 0)
+	if((tick % 250) == 0)       // set flag every 250 miliseconds
 		timerStatus.f250ms = 1;
-	if((tick % 500) == 0)	// set flag every 500 miliseconds
+	if((tick % 500) == 0)	      // set flag every 500 miliseconds
 		timerStatus.f500ms = 1;
-	
-	LPC_TIM0->IR |= 1;	// reset MR0 interrupt
-	if((tick % 1000) == 0){
+	if((tick % 1000) == 0){     // set flag every second and reset tick
 		timerStatus.f1s = 1;
 		tick = 0;
 	}
+  LPC_TIM0->IR |= 1;	// reset MR0 interrupt
 }

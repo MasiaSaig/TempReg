@@ -11,7 +11,7 @@ void PWM_Init(uint32_t frequency){
     LPC_SC->PCLKSEL0 |= (0 << SBIT_PCLK_PWM1);  // set them to 00 - default
 
     // Configure P1.18 as PWM1.1 (Function 10) 
-	// P2.0 psuje LCD uzywac 1.18
+	// P2.0 breaks LCD, better use pin 1.18
     PIN_Configure(1, 18, 0b10, 0, 0); // alternative using PIN lib
 
     // Set PWM1 to single edge mode - redundant, bit 0:1 unused 
@@ -39,7 +39,7 @@ void PWM_Init(uint32_t frequency){
 }
 
 void PWM_SetDutyCycle(uint8_t dutyCycle){
-    if (dutyCycle > 100) // No more than 100
+    if (dutyCycle > 100)      // No more than 100
 			dutyCycle = 100;
 		else if(dutyCycle < 0)
 			dutyCycle = 0;
