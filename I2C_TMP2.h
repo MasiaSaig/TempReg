@@ -18,7 +18,8 @@ extern volatile uint32_t I2C_Event;		//!< Event from I2C protocol, which is hand
 
 extern uint16_t currentTemperature;		//!< Current temperature, read by sensor.
 
-/*! Initialize TMP2 to use I2C protocot. 
+/**
+ * Initialize TMP2 to use I2C protocot. 
  *
  * @return Initialization status, 0 means initialization was succesful, otherwise, there was some error.
  */
@@ -26,19 +27,24 @@ int32_t TMP2_Initialize(void);
 
 /*! Function used in initialization, which sends address of slave and reads data(temperature).  */
 //int32_t TMP2_Read_Event(uint16_t addr, uint8_t *buf, uint32_t len);
-/*! Read events from TMP2 and handles them. */
+/**
+ * Read events from TMP2 and handles them. 
+ *
+ * @return void
+ */
 void I2C_SignalEvent(uint32_t event);
 
-/*! Read temperature data, from TMP2 and convert it to Celsius degrees.
+/**
+ * Read temperature data, from TMP2 and convert it to Celsius degrees.
+ *
  * @return False if not all data were transfered.
  */
 bool readTemperature(void);
-/*! Convert temperature data from TMP2 into Celsius degrees. */
+/**
+ * Convert temperature data from TMP2 into Celsius degrees. 
+ *
+ * @return void
+ */
 inline void convertTemperature(void);
-
-
-
-// TODO: DO SPRAWDZENIA
-//int32_t TMP2_Initialize2(void);
 
 #endif

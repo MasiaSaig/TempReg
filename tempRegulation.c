@@ -11,7 +11,7 @@ float Amplification_I = 1.0; //0.01;
 float Amplification_D = 0.0; //0.1;
 
 uint16_t currentTemperature = 0;
-uint16_t setTemperature = 35;
+int16_t setTemperature = 35;
 uint8_t PIDControl = 0;
 int16_t temperatureError = 0;
 uint16_t heaterPower = 0;
@@ -46,7 +46,8 @@ void calculatePID(void){
 	// TODO: oblicz moc, czyli U / czas
 	// P_on = (V_cc * V_cc) / R_heater
 	// P_avg = D * P_on 	where D is value between 0-1, that is time when heater is ON during 1 second
-
+  heaterPower = output * 0.0439; // output/100 * (6*6/8.2);
+  
 	PWM_SetDutyCycle(output);
 }
 

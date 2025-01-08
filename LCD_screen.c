@@ -24,11 +24,11 @@ void drawLetter(uint16_t x, uint16_t y, c_uchar letter, uint16_t fontColor, uint
 			11111111
 	*/
 	unsigned char buffer[16];
-	// skopiowanie danych litery wybranej czcionki 1 (mozna wybrac tez 0)
+  // copying letter data of chosen font 1 (you can change font to 0)
 	GetASCIICode(1,buffer, letter);
 
 	for(uint16_t j=0; j<16; ++j){
-		lcdSetCursor(x,y+j); 			// resetuje index, so its necessary to also call lcdWriteIndex()
+		lcdSetCursor(x,y+j); 			// resets index, so its necessary to also call lcdWriteIndex()
 		lcdWriteIndex(DATA_RAM); 
 		for(uint16_t i=0; i<8; ++i){
 			lcdWriteData((buffer[j]>>(8-i)&0b1) ? fontColor : backgroundColor);
@@ -38,7 +38,6 @@ void drawLetter(uint16_t x, uint16_t y, c_uchar letter, uint16_t fontColor, uint
 
 void drawString(uint16_t x, uint16_t y, c_uchar* string, uint16_t fontColor, uint16_t backgroundColor){
 	for (int i=0; string[i] != '\0'; ++i){
-		//if (string[i] == '\0') break;
 		drawLetter(x+8*i,y, string[i], fontColor, backgroundColor);
 	}
 }
@@ -58,7 +57,6 @@ void drawNumber(uint16_t x, uint16_t y, int16_t number, uint16_t fontColor, uint
 
 void setBackground(uint16_t backgroundColor){
 	lcdSetCursor(0,0);
-	// rozbicie lcdWriteRed(), na lcdWriteIndex(data_ram) oraz lcdWriteData(data)
 	lcdWriteIndex(DATA_RAM);
 	uint32_t pixelsNum = LCD_MAX_X*LCD_MAX_Y;
 	for(uint32_t i=0; i<pixelsNum; ++i){
@@ -68,17 +66,22 @@ void setBackground(uint16_t backgroundColor){
 
 
 void updateDataOnScreen(void){
-	drawNumber(112,8,  currentTemperature,	DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
-	drawNumber(144,32, setTemperature,			DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
-	drawNumber(160,56, temperatureError,		DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
-	drawNumber(64,80,  heaterPower,					DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawNumber(PADDING_SIDE+13*LETTER_WIDTH,PADDING_TOP,                                 currentTemperature,  DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawNumber(PADDING_SIDE+17*LETTER_WIDTH,PADDING_TOP+LETTER_HEIGHT+PADDING_TOP,       setTemperature,			DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawNumber(PADDING_SIDE+19*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*2,   temperatureError,		DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawNumber(PADDING_SIDE+07*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*3,   heaterPower,					DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+  if(PIDControl)
+    drawString(PADDING_SIDE+14*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*4,   (c_uchar*)"PID",					DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+  else
+    drawString(PADDING_SIDE+14*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*4,   (c_uchar*)"two-positional",					DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
 }
 
 void drawConstantDataOnScreen(void){
   setBackground(DEFAULT_BG_COLOR);
-	drawString(8,8,  (c_uchar*)"Temperature: ",       DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
-	drawString(8,32, (c_uchar*)"Set Temperature: ",   DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
-	drawString(8,56, (c_uchar*)"Temperature Error: ", DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
-	drawString(8,80, (c_uchar*)"Power: ",             DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawString(PADDING_SIDE,PADDING_TOP,                               (c_uchar*)"Temperature: ",       DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawString(PADDING_SIDE,PADDING_TOP+LETTER_HEIGHT+PADDING_TOP,     (c_uchar*)"Set Temperature: ",   DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawString(PADDING_SIDE,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*2, (c_uchar*)"Temperature Error: ", DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawString(PADDING_SIDE,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*3, (c_uchar*)"Power: ",             DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+  drawString(PADDING_SIDE,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*4, (c_uchar*)"Control Mode: ",      DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
 }
 	

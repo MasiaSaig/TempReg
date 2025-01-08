@@ -17,7 +17,9 @@ void I2C_SignalEvent(uint32_t event) {
     UARTprintString("Slave address was not acknowledged"); 
   }
   if (event & ARM_I2C_EVENT_ARBITRATION_LOST) { /* Master lost bus arbitration */ } 
-  if (event & ARM_I2C_EVENT_BUS_ERROR) { UARTprintString("invalid start/stop position detected"); }
+  if (event & ARM_I2C_EVENT_BUS_ERROR) { 
+    UARTprintString("invalid start/stop position detected"); 
+  }
   if (event & ARM_I2C_EVENT_BUS_CLEAR) { /* Bus clear operation completed */ }
   if (event & ARM_I2C_EVENT_GENERAL_CALL) { /* Slave was addressed with a general call address */ }
   if (event & ARM_I2C_EVENT_SLAVE_RECEIVE) { /* Slave addressed as receiver but SlaveReceive operation is not started */ }
@@ -90,29 +92,3 @@ bool readTemperature(void){
 	convertTemperature();
 	return true;
 }
-
-/*int32_t TMP2_Initialize2(void) {
-  I2Cdrv->Initialize(I2C_SignalEvent);
-	
-  I2Cdrv->PowerControl (ARM_POWER_FULL);
-  I2Cdrv->Control      (ARM_I2C_BUS_SPEED, ARM_I2C_BUS_SPEED_STANDARD);		// ARM_I2C_BUS_SPEED_FAST
-  I2Cdrv->Control      (ARM_I2C_BUS_CLEAR, 0);
-	
-  I2C_Event = 0U;			// Clear event flags before new transfer
-	
-	// https://www.analog.com/media/en/technical-documentation/data-sheets/ADT7420.pdf Here for setting configuration etc.
-	// pending = true (doesnt send stop), to restart, that is to send 2 start conditions
-	// start send 0x0 -> start read 2 bytes with stop at the end
-	I2Cdrv->MasterTransmit(TMP2_ADDRESS, TMP2_TEMP_ADDRESS, 1, true);
-	while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U) {};							// Wait until transfer completed
-  if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
-		
-	I2Cdrv->MasterReceive(TMP2_ADDRESS, tempData, TEMP_DATA_SIZE, false);
-  while ((I2C_Event & ARM_I2C_EVENT_TRANSFER_DONE) == 0U);								// Wait until transfer completed
-  if ((I2C_Event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) != 0U) return -1;		// Check if all data transferred
-	
-	convertTemperature();
-		
-  return 0;
-}
-*/

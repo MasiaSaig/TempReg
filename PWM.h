@@ -13,17 +13,20 @@
 #define SCCLK 100000000     // System Core Clock (100 MHz)
 #define PCLK (SCCLK/4)      // Peripheral Clock (25 MHz)
 
-/*! Initialization of PWM on pin 1.18
+/** 
+ * Initialization of PWM on pin 1.18
  *
  * Initialization of PWM on pin 1.18 with single-edge mode. 
  * It also turns PWM ON, enables PWM timer and prescaler.
  *
- * @param[in] frequency Frequency of PWM given in Mhz. It determines length of PWM period
+ * @param[in] frequency Frequency of PWM given in Hertz. It determines length of PWM period
  * @return void
  */
 void PWM_Init(uint32_t frequency);
 
-/*! Set pulse width/duration of PWM
+/**
+ * Set pulse width/duration of PWM
+ *
  * @param[n] dutyCycle Takes value from 0 to 100, representing precent of a PWM period, for how long should pulse be active.
  * @return false
  */

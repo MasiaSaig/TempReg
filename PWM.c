@@ -39,9 +39,9 @@ void PWM_Init(uint32_t frequency){
 }
 
 void PWM_SetDutyCycle(uint8_t dutyCycle){
-    if (dutyCycle > 100)      // No more than 100
+    if (dutyCycle > 100)      // No more than 100%
 			dutyCycle = 100;
-		else if(dutyCycle < 0)
+		else if(dutyCycle < 0)    // No less than 0%
 			dutyCycle = 0;
     LPC_PWM1->MR1 = (LPC_PWM1->MR0 * dutyCycle) / 100;
     LPC_PWM1->LER = (1 << 1); // Load MR1 value

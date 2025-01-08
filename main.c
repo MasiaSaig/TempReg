@@ -1,15 +1,18 @@
 /*
 TODO: 
-	- implement changing between temperature regulation modes
-	- test temperature regulation
-	- calculating power consumption by heater	
+	- test changing between temperature regulation modes
+	- test temperature regulation and tune PID amplifications
+	- calculating power consumption by heater, check it
 	- test I2C events on sensor unplugging
+  - gather data to plot them for documentation
+  - calculate power consumption
 (optional)
-	- set watchdog
+	- setup watchdog
 	- setup leds
 	- user changing PID amplifications and ?limit?
   - wybierz jedną czcionke w asciiLib.c, asciiLib.h
 	- ?? refactor whole code, to use events instead of while(true) loop ?? not really needed
+  
 Microprocessor specs:
 	CCLK = 100Mhz and PCLK = 25Mhz
 */
@@ -27,23 +30,31 @@ Microprocessor specs:
 //#include <Board_LED.h>
 #include <Board_Buttons.h>
 
-void handleButtons();
+typedef struct{
+  uint8_t KEY1      : 1;
+  uint8_t KEY2      : 1;
+  uint8_t BOTHKEYS  : 6;
+} pressedButtonsStatus;
+pressedButtonsStatus buttonsStatus;
+
+void updateButtonsStatus();
 
 int main(){
 	////// INITIALIZATION //////
 	//LED_Initialize();
 	initUART0();
-  
 	PWM_Init(1);
 	initTimer();
-	initLCDScreen();
+	initLCDScreen();    // define 'ILI9328' in compiler
 	UARTprintString("Initializing I2C... \n");
 	UARTprintInt(TMP2_Initialize());
 	UARTprintString("\nInitialization of I2C completed. ");
 	Buttons_Initialize();
+  buttonsStatus.KEY1 = 0;
+  buttonsStatus.KEY2 = 0;
+  buttonsStatus.BOTHKEYS = 0;
   
-	/* prepare screen background and unchangable letters */
-	// define 'ILI9328' in compiler
+	// prepare screen background and unchangable letters
 	drawConstantDataOnScreen();
   
 	////// MAIN LOOP //////
@@ -57,11 +68,15 @@ int main(){
 		}
 		if(timerStatus.f50ms){
 			timerStatus.f50ms = 0;	// reset flag
-		}
-		if(timerStatus.f250ms){
-			// handle buttons
-			// debouncing handles automatically, since buttons can be pressed only every 50ms
-			handleButtons();
+      updateButtonsStatus();  // <---------------------|  xD
+		}                                            //    |
+		if(timerStatus.f250ms){                      //    |
+			// handle buttons                          //    |
+			if(buttonsStatus.KEY1) ++setTemperature;   //    |
+      if(buttonsStatus.KEY2) --setTemperature;   //    |
+      // if user holds both buttons for atleast 40*50ms == 2s, then switch temperature regulation mode
+      if(buttonsStatus.BOTHKEYS >= 40) PIDControl = !PIDControl;
+      
 			updateDataOnScreen();
 			
 			timerStatus.f250ms = 0;	// reset flag
@@ -84,12 +99,21 @@ int main(){
 	}
 }
 
-void handleButtons(){
-	if(Buttons_GetState() & 1) {		// KEY 2
-		if(setTemperature <= MAX_TEMPERATURE)
-			++setTemperature;
+void updateButtonsStatus(){
+  if((Buttons_GetState() & 1) && (Buttons_GetState() & 2)) {
+    ++buttonsStatus.BOTHKEYS;
+    buttonsStatus.KEY1 = 0;
+    buttonsStatus.KEY2 = 0;
+    if(buttonsStatus.BOTHKEYS > 40) buttonsStatus.BOTHKEYS = 0;
+	}else if(Buttons_GetState() & 1) {		// KEY 2
+		if(setTemperature <= MAX_TEMPERATURE){
+			buttonsStatus.KEY1 = 1;
+      buttonsStatus.BOTHKEYS = 0;
+    }
 	}else if((Buttons_GetState() & 2)){ 	// KEY 1
-		if(setTemperature >= MIN_TEMPERATURE)
-			--setTemperature;
+		if(setTemperature >= MIN_TEMPERATURE){
+			buttonsStatus.KEY2 = 1;
+      buttonsStatus.BOTHKEYS = 0;
+    }
 	}
 }
