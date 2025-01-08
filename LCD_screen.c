@@ -42,17 +42,71 @@ void drawString(uint16_t x, uint16_t y, c_uchar* string, uint16_t fontColor, uin
 	}
 }
 
-void drawNumber(uint16_t x, uint16_t y, int16_t number, uint16_t fontColor, uint16_t backgroundColor){
-	int idx = 3;
-	uchar numberString[5];
-	do{
-		numberString[idx--] = (char)('0' + number % 10);
-		number /= 10;
-	}while(number);
-	
-	for(;idx>=0;--idx) { numberString[idx] = ' '; }
-	numberString[4]='\0';	// add string termination
-	drawString(x, y, numberString, fontColor, backgroundColor);
+void drawIntNumber(uint16_t x, uint16_t y, int16_t number, uint16_t fontColor, uint16_t backgroundColor){
+  // draw minus ('-') if number if lower than zero
+  if(number < 0){
+    drawLetter(x,y,'-',fontColor,backgroundColor);
+    number *= -1;
+    x += LETTER_WIDTH;
+  }
+  
+  int8_t digits = 0;
+  int16_t number_cpy = number;
+  // count digits
+  do{
+    number_cpy = number_cpy / 10;
+    ++digits;
+  }while(number_cpy);
+  
+  // draw digits, starting from most-significant one
+  int modulator = 1;
+  for(uint8_t i=1;i<digits; ++i) { modulator *= 10; }
+  do{
+    drawLetter(x,y,'0'+number/modulator,fontColor,backgroundColor);
+    x += LETTER_WIDTH;
+    --digits;
+    modulator /= 10;
+  }while(number);
+}
+
+void drawFloatNumber(uint16_t x, uint16_t y, float number, uint8_t precision, uint16_t fontColor, uint16_t backgroundColor){
+  // draw minus ('-') if number if lower than zero
+  if(number < 0){
+    drawLetter(x,y,'-',fontColor,backgroundColor);
+    number *= -1;
+    x += LETTER_WIDTH;
+  }
+  
+  int8_t digits = 0;
+  uint16_t number_cpy = number;
+  // count digits
+  do{
+    number_cpy = number_cpy / 10;
+    ++digits;
+  }while(number_cpy);
+  
+  for(uint8_t i=0; i<precision; ++i) { number *= 10; }
+  digits += precision;
+  // draw digits, starting from most-significant one
+  int modulator = 1;
+  for(uint8_t i=1;i<digits; ++i) { modulator *= 10; }
+  do{
+    drawLetter(x,y,'0'+(int)(number/modulator),fontColor,backgroundColor);
+    x += LETTER_WIDTH;
+    --digits;
+    modulator /= 10;
+  }while(digits > precision);
+  
+  // draw dot
+  drawLetter(x, y, '.', fontColor, backgroundColor);
+  x += LETTER_WIDTH;
+  
+  for(uint8_t i=0; i<precision; ++i){
+    drawLetter(x,y,'0'+(int)(number/modulator),fontColor,backgroundColor);
+    x += LETTER_WIDTH;
+    --digits;
+    modulator /= 10;
+  }
 }
 
 void setBackground(uint16_t backgroundColor){
@@ -66,14 +120,14 @@ void setBackground(uint16_t backgroundColor){
 
 
 void updateDataOnScreen(void){
-	drawNumber(PADDING_SIDE+13*LETTER_WIDTH,PADDING_TOP,                                 currentTemperature,  DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
-	drawNumber(PADDING_SIDE+17*LETTER_WIDTH,PADDING_TOP+LETTER_HEIGHT+PADDING_TOP,       setTemperature,			DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
-	drawNumber(PADDING_SIDE+19*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*2,   temperatureError,		DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
-	drawNumber(PADDING_SIDE+07*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*3,   heaterPower,					DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawIntNumber(PADDING_SIDE+13*LETTER_WIDTH,PADDING_TOP,                                 currentTemperature, DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawIntNumber(PADDING_SIDE+17*LETTER_WIDTH,PADDING_TOP+LETTER_HEIGHT+PADDING_TOP,       setTemperature,			DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawIntNumber(PADDING_SIDE+19*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*2,   temperatureError,		DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+	drawFloatNumber(PADDING_SIDE+07*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*3, heaterPower, 2,		  DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
   if(PIDControl)
-    drawString(PADDING_SIDE+14*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*4,   (c_uchar*)"PID",					DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+    drawString(PADDING_SIDE+14*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*4, (c_uchar*)"PID           ", DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
   else
-    drawString(PADDING_SIDE+14*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*4,   (c_uchar*)"two-positional",					DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+    drawString(PADDING_SIDE+14*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*4, (c_uchar*)"two-positional", DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
 }
 
 void drawConstantDataOnScreen(void){

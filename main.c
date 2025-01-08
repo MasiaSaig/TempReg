@@ -1,11 +1,9 @@
 /*
 TODO: 
-	- test changing between temperature regulation modes
-	- test temperature regulation and tune PID amplifications
-	- calculating power consumption by heater, check it
+	- tune PID amplifications
 	- test I2C events on sensor unplugging
   - gather data to plot them for documentation
-  - calculate power consumption
+  - check calculated power consumption
 (optional)
 	- setup watchdog
 	- setup leds
@@ -67,18 +65,16 @@ int main(){
 			timerStatus.f5ms = 0;		// reset flag
 		}
 		if(timerStatus.f50ms){
-			timerStatus.f50ms = 0;	// reset flag
+      // handle buttons
+      if(buttonsStatus.KEY1) ++setTemperature;
+      if(buttonsStatus.KEY2) --setTemperature;
       updateButtonsStatus();  // <---------------------|  xD
-		}                                            //    |
+      updateDataOnScreen();                      //    |
+      timerStatus.f50ms = 0;	// reset flag      //    |
+    }                                            //    |
 		if(timerStatus.f250ms){                      //    |
-			// handle buttons                          //    |
-			if(buttonsStatus.KEY1) ++setTemperature;   //    |
-      if(buttonsStatus.KEY2) --setTemperature;   //    |
       // if user holds both buttons for atleast 40*50ms == 2s, then switch temperature regulation mode
       if(buttonsStatus.BOTHKEYS >= 40) PIDControl = !PIDControl;
-      
-			updateDataOnScreen();
-			
 			timerStatus.f250ms = 0;	// reset flag
 		}
 		if(timerStatus.f500ms){
@@ -105,15 +101,21 @@ void updateButtonsStatus(){
     buttonsStatus.KEY1 = 0;
     buttonsStatus.KEY2 = 0;
     if(buttonsStatus.BOTHKEYS > 40) buttonsStatus.BOTHKEYS = 0;
-	}else if(Buttons_GetState() & 1) {		// KEY 2
+  }else if(Buttons_GetState() & 1) {		// KEY 2
 		if(setTemperature <= MAX_TEMPERATURE){
-			buttonsStatus.KEY1 = 1;
-      buttonsStatus.BOTHKEYS = 0;
-    }
-	}else if((Buttons_GetState() & 2)){ 	// KEY 1
+			  buttonsStatus.KEY1 = 1;
+			  buttonsStatus.KEY2 = 0;
+			  buttonsStatus.BOTHKEYS = 0;
+		  }
+  }else if((Buttons_GetState() & 2)){ 	// KEY 1
 		if(setTemperature >= MIN_TEMPERATURE){
-			buttonsStatus.KEY2 = 1;
-      buttonsStatus.BOTHKEYS = 0;
-    }
-	}
+			  buttonsStatus.KEY2 = 1;
+			  buttonsStatus.KEY1 = 0;
+			  buttonsStatus.BOTHKEYS = 0;
+		  }
+  }else{
+	  buttonsStatus.KEY1 = 0;
+	  buttonsStatus.KEY2 = 0;
+	  buttonsStatus.BOTHKEYS = 0;
+  }
 }

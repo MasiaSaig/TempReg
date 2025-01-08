@@ -7,7 +7,7 @@ void initTimer(void){
 	/* Table 425 */
 	// Timer increments, every milisecond
 	LPC_TIM0->CTCR = 0x0;
-	LPC_TIM0->PR = 25000-1;		// TC increments every milisecond
+	LPC_TIM0->PR = 100000-1;		// TC increments every milisecond
 														// [25MHz / s] = 1000 => [25MHz / 1000] = 25000Hz = s
 	LPC_TIM0->MCR = (1<<0) | (1<<1);		// if TC == MR0, generate interrupt
 	LPC_TIM0->MR0 = 1;
