@@ -68,7 +68,7 @@ void drawIntNumber(uint16_t x, uint16_t y, int16_t number, uint16_t fontColor, u
  *
  * Draws given float number, with its nth mantysa digits (where n is number provided in precision parameter), to screen 
  * using font, defined in 'asciiLib.c' written in ASCII 16x8. With apropriate colors, given by user. 
- * It uses drawLetter() and drawIntNumber() function.
+ * It uses drawLetter() function.
  *
  * @param[in] x X coordinate on screen.
  * @param[in] y Y coordinate on screen.

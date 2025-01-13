@@ -6,10 +6,9 @@ TODO:
   - check calculated power consumption
 (optional)
 	- setup watchdog
-	- setup leds
+	- setup leds, to show power consumption
 	- user changing PID amplifications and ?limit?
   - wybierz jedną czcionke w asciiLib.c, asciiLib.h
-	- ?? refactor whole code, to use events instead of while(true) loop ?? not really needed
   
 Microprocessor specs:
 	CCLK = 100Mhz and PCLK = 25Mhz

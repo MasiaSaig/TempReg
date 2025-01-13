@@ -3,13 +3,13 @@
 #include "PWM.h"
 #include "UART.h"
 
-#define INTEGRAL_LIMIT 1000000
+#define INTEGRAL_LIMIT 10000
 
 // TODO: tune amplifications, calibrate, propert Amplification values
 // Amplification values
 float Amplification_P = 30.0; //0.1;
-float Amplification_I = 1.0; //0.01;
-float Amplification_D = 0.0; //0.1;
+float Amplification_I = 0.1; //0.01;
+float Amplification_D = 0.1; //0.1;
 
 uint16_t currentTemperature = 0;
 int16_t setTemperature = 35;
@@ -17,7 +17,7 @@ uint8_t PIDControl = 1;
 int16_t temperatureError = 0;
 uint16_t heaterPower = 0;
 
-const uint32_t deltaTime_us = 100000; // == 1 s
+const uint32_t deltaTime_us = 1; // == 1 s
 int32_t sumTemperatureError = 0;
 
 void calculatePID(void){
@@ -25,7 +25,7 @@ void calculatePID(void){
 	int16_t temperatureErrorPrev = temperatureError;
 	temperatureError = setTemperature - currentTemperature;
 	
-	// if temperatureError is lower than 16, dont apply integral
+	// Apply integral only if temperature is lower than 16
 	if(temperatureError < 16){
 	 	sumTemperatureError += temperatureError*deltaTime_us;
 		// boundary
