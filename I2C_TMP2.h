@@ -16,7 +16,7 @@ extern ARM_DRIVER_I2C Driver_I2C0;
 extern ARM_DRIVER_I2C *I2Cdrv;
 extern volatile uint32_t I2C_Event;		//!< Event from I2C protocol, which is handled in I2C_SignalEvent() function/
 
-extern uint16_t currentTemperature;		//!< Current temperature, read by sensor.
+extern float currentTemperature;		//!< Current temperature, read by sensor.
 
 /**
  * Initialize TMP2 to use I2C protocot. 

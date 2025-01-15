@@ -1,11 +1,8 @@
 /*
 TODO: 
-	- tune PID amplifications
-	- test I2C events on sensor unplugging
-  - gather data to plot them for documentation
-  - check calculated power consumption
-  - check LED displaying power consumption
 (optional)
+  - improve error handling for I2C, LCD display and heater (pin 1.18)
+  - check LED displaying power consumption
 	- setup watchdog
 	- setup leds, to show power consumption
 	- user changing PID amplifications and ?limit?
@@ -29,6 +26,8 @@ Microprocessor specs:
 #include <Board_LED.h>
 #include <Board_Buttons.h>
 
+#define CONTROL_SWITCH_THRESHOLD 10
+
 sensors_errors_flags sensors_errors = {0};
 
 typedef struct{
@@ -36,34 +35,42 @@ typedef struct{
   uint8_t KEY2      : 1;
   uint8_t BOTHKEYS  : 6;
 } pressedButtonsStatus;
+
 pressedButtonsStatus buttonsStatus;
 
-void updateButtonsStatus();
+void updateButtonsStatus(void);
 
 int main(){
 	////// INITIALIZATION //////
-	LED_Initialize();
+	//LED_Initialize();
 	initUART0();
+  UARTprintString("UART Initialized.\n\r");
 	PWM_Init(1);
+  UARTprintString("PWM Initialized.\n\r");
 	initTimer();
+  UARTprintString("Timer Initialized.\n\r");
 	initLCDScreen();    // define 'ILI9328' in compiler
+  UARTprintString("LCD Screen Initialized.\n\r");
 	UARTprintString("Initializing I2C... \n");
 	UARTprintInt(TMP2_Initialize());
-	UARTprintString("\nInitialization of I2C completed. ");
+  UARTprintString("TMP2 Initialized.\n\r");
 	Buttons_Initialize();
+  UARTprintString("Buttons Initialized.\n\r");
   buttonsStatus.KEY1 = 0;
   buttonsStatus.KEY2 = 0;
   buttonsStatus.BOTHKEYS = 0;
-  
+ 
 	// prepare screen background and unchangable letters
 	drawConstantDataOnScreen();
   
-  uint8_t LED_COUNT = LED_GetCount();
+  //uint8_t LED_COUNT = LED_GetCount();
   
 	////// MAIN LOOP //////
 	while(true){
+		
 		if(timerStatus.f1ms){
 			timerStatus.f1ms = 0; 	// reset flag
+				
 		}
 		if(timerStatus.f5ms){
 			/* handling input buttons */
@@ -71,60 +78,80 @@ int main(){
 		}
 		if(timerStatus.f50ms){
       // handle buttons
+		updateButtonsStatus();
       if(buttonsStatus.KEY1) ++setTemperature;
       if(buttonsStatus.KEY2) --setTemperature;
-      updateButtonsStatus();  // <---------------------|  xD
-      updateDataOnScreen();                      //    |
-      timerStatus.f50ms = 0;	// reset flag      //    |
-    }                                            //    |
-		if(timerStatus.f250ms){                      //    |
-      // if user holds both buttons for atleast 40*50ms == 2s, then switch temperature regulation mode
-      if(buttonsStatus.BOTHKEYS >= 40) PIDControl = !PIDControl;
-			timerStatus.f250ms = 0;	// reset flag
+	  if(buttonsStatus.BOTHKEYS == CONTROL_SWITCH_THRESHOLD) PIDControl = !PIDControl;
+
+      updateDataOnScreen();
+      timerStatus.f50ms = 0;	// reset flag
+    }
+		if(timerStatus.f250ms){
+		  timerStatus.f250ms = 0;	// reset flag
 		}
+			
 		if(timerStatus.f500ms){
 			timerStatus.f500ms = 0;	// reset flag
 		}
 		if(timerStatus.f1s){
 			/* main PID functionality, reading and calculating temperature */
 			readTemperature();
-			UARTprintInt(currentTemperature);
+			//UARTprintFloat(currentTemperature);
 			// calculating temperature regulations and power
-			if(PIDControl == 1)
-				calculatePID();
+			if(PIDControl == 1){
+				uint16_t dutyCycle = calculatePID();
+				PWM_SetDutyCycle(dutyCycle);
+				//UARTprintString(" ");
+				//UARTprintInt(dutyCycle);
+			}
 			else
 				twoPositionalControl();
+			
+			//UARTprintString("\n\r");
       // turn ON/OFF LEDs according to current power consumption
-      for(float i=0; i<LED_COUNT; ++i){
+      /*for(float i=0; i<LED_COUNT; ++i){
         if((heaterPower/MAX_HEATER_POWER) * (i+1) < heaterPower)
           LED_On(i);
         else
           LED_Off(i);
-      }
+      }*/
 			
 			timerStatus.f1s = 0;		// reset flag
 		}
 	}
 }
 
-void updateButtonsStatus(){
-  if((Buttons_GetState() & 1) && (Buttons_GetState() & 2)) {
+void updateButtonsStatus(void){
+  if((Buttons_GetState() & 1) && (Buttons_GetState() & 2)) { // KEY 1 and KEY 2
     ++buttonsStatus.BOTHKEYS;
     buttonsStatus.KEY1 = 0;
     buttonsStatus.KEY2 = 0;
-    if(buttonsStatus.BOTHKEYS > 40) buttonsStatus.BOTHKEYS = 0;
+	if(buttonsStatus.BOTHKEYS == CONTROL_SWITCH_THRESHOLD+1) {
+		buttonsStatus.BOTHKEYS = 0;
+	}
   }else if(Buttons_GetState() & 1) {		// KEY 2
 		if(setTemperature <= MAX_TEMPERATURE){
 			  buttonsStatus.KEY1 = 1;
 			  buttonsStatus.KEY2 = 0;
 			  buttonsStatus.BOTHKEYS = 0;
-		  }
+		}else{
+				buttonsStatus.KEY1 = 0;
+			  buttonsStatus.KEY2 = 0;
+			  buttonsStatus.BOTHKEYS = 0;
+		}
+		
+		
   }else if((Buttons_GetState() & 2)){ 	// KEY 1
 		if(setTemperature >= MIN_TEMPERATURE){
 			  buttonsStatus.KEY2 = 1;
 			  buttonsStatus.KEY1 = 0;
 			  buttonsStatus.BOTHKEYS = 0;
 		  }
+		else{
+			buttonsStatus.KEY1 = 0;
+			  buttonsStatus.KEY2 = 0;
+			  buttonsStatus.BOTHKEYS = 0;
+		}
   }else{
 	  buttonsStatus.KEY1 = 0;
 	  buttonsStatus.KEY2 = 0;

@@ -40,3 +40,9 @@ void UARTprintInt(int x){
 		divider /= 10;
 	}
 }
+
+void UARTprintFloat(float x){
+	UARTprintInt(x);
+	UARTprintString(".");
+	UARTprintInt((x-(int)(x))*100);
+}

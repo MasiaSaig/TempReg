@@ -24,9 +24,17 @@ void UARTprintString(const char* str);
 /**
  * Sends given integer number to connected device (PC) using UART.
  *
- * @param[in] x Number to send.
+ * @param[in] num Number to send.
  * @return void;
  */
-void UARTprintInt(int x);
+void UARTprintInt(int num);
+
+/**
+ * Sends given float number to connected device (PC) using UART.
+ *
+ * @param[in] num Number to send.
+ * @return void;
+ */
+void UARTprintFloat(float num);
 
 #endif

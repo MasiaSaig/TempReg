@@ -14,7 +14,6 @@ void I2C_SignalEvent(uint32_t event) {
   if (event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) { /* Less data was transferred than requested */ }
   if (event & ARM_I2C_EVENT_TRANSFER_DONE) { /* Transfer or receive is finished */ }
   if (event & ARM_I2C_EVENT_ADDRESS_NACK) { 
-    // which means, sensor was unplugged... right? it should be :| 
     UARTprintString("I2C Slave address was not acknowledged\t"); 
     sensors_errors.I2CDisconnected = 1;
   }else { sensors_errors.I2CDisconnected = 0; }
@@ -82,8 +81,7 @@ int32_t TMP2_Initialize(void) {
 /* https://digilent.com/reference/_media/reference/pmod/pmodtmp2/pmodtmp2_rm.pdf section: Quick Start Operation */
 // Converts MSB and LSB into temperature value, represented in Celsius degrees
 void convertTemperature(void){
-	currentTemperature = (tempData[0]<<8) | tempData[1];
-	currentTemperature = (currentTemperature>>3) * 0.0625;
+	currentTemperature = (((tempData[0]<<8) | tempData[1])>>3) * 0.0625;
 }
 
 bool readTemperature(void){

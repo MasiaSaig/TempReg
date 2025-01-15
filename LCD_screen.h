@@ -10,6 +10,7 @@ typedef unsigned char uchar;
 #define DEFAULT_FONT_COLOR LCDWhite
 #define DEFAULT_BG_COLOR	 LCDBlack
 
+#define MAX_NUMBER_LENGTH 6   //!< Number that tells, how many digits should a number contain (so the rest of a space can be cleared with empty spaces ' ')
 #define PADDING_TOP  4
 #define PADDING_SIDE 8
 #define LETTER_WIDTH 8
