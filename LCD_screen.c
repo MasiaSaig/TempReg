@@ -3,6 +3,7 @@
 #include "asciiLib.h"
 #include "tempRegulation.h"
 #include "I2C_TMP2.h"
+#include "sensors_errors.h"
 
 void initLCDScreen(void){
 	lcdConfiguration();
@@ -120,7 +121,10 @@ void setBackground(uint16_t backgroundColor){
 
 
 void updateDataOnScreen(void){
-	drawIntNumber(PADDING_SIDE+13*LETTER_WIDTH,PADDING_TOP,                                 currentTemperature, DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+  if(sensors_errors.I2CDisconnected == 0)
+    drawIntNumber(PADDING_SIDE+13*LETTER_WIDTH,PADDING_TOP, currentTemperature, DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+  else
+    drawString(PADDING_SIDE+13*LETTER_WIDTH,PADDING_TOP, (c_uchar*) "Error", DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
 	drawIntNumber(PADDING_SIDE+17*LETTER_WIDTH,PADDING_TOP+LETTER_HEIGHT+PADDING_TOP,       setTemperature,			DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
 	drawIntNumber(PADDING_SIDE+19*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*2,   temperatureError,		DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
 	drawFloatNumber(PADDING_SIDE+07*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*3, heaterPower, 2,		  DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
@@ -128,6 +132,9 @@ void updateDataOnScreen(void){
     drawString(PADDING_SIDE+14*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*4, (c_uchar*)"PID           ", DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
   else
     drawString(PADDING_SIDE+14*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*4, (c_uchar*)"two-positional", DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+  
+  if(sensors_errors.I2CDisconnected == 0)
+    drawString(PADDING_SIDE, PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*6, (c_uchar*)"Cannot recive temperature", LCDRed, DEFAULT_BG_COLOR);
 }
 
 void drawConstantDataOnScreen(void){

@@ -489,6 +489,11 @@
               <FileType>5</FileType>
               <FilePath>.\UART.h</FilePath>
             </File>
+            <File>
+              <FileName>sensors_errors.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\sensors_errors.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

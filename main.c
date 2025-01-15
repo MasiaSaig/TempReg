@@ -4,6 +4,7 @@ TODO:
 	- test I2C events on sensor unplugging
   - gather data to plot them for documentation
   - check calculated power consumption
+  - check LED displaying power consumption
 (optional)
 	- setup watchdog
 	- setup leds, to show power consumption
@@ -20,12 +21,15 @@ Microprocessor specs:
 #include "timer.h"
 #include "tempRegulation.h"
 #include "LCD_screen.h"
+#include "sensors_errors.h"
 
 #include <LPC17xx.h>
 #include <PIN_LPC17xx.h>
 #include <Driver_I2C.h>
-//#include <Board_LED.h>
+#include <Board_LED.h>
 #include <Board_Buttons.h>
+
+sensors_errors_flags sensors_errors = {0};
 
 typedef struct{
   uint8_t KEY1      : 1;
@@ -38,7 +42,7 @@ void updateButtonsStatus();
 
 int main(){
 	////// INITIALIZATION //////
-	//LED_Initialize();
+	LED_Initialize();
 	initUART0();
 	PWM_Init(1);
 	initTimer();
@@ -53,6 +57,8 @@ int main(){
   
 	// prepare screen background and unchangable letters
 	drawConstantDataOnScreen();
+  
+  uint8_t LED_COUNT = LED_GetCount();
   
 	////// MAIN LOOP //////
 	while(true){
@@ -88,6 +94,13 @@ int main(){
 				calculatePID();
 			else
 				twoPositionalControl();
+      // turn ON/OFF LEDs according to current power consumption
+      for(float i=0; i<LED_COUNT; ++i){
+        if((heaterPower/MAX_HEATER_POWER) * (i+1) < heaterPower)
+          LED_On(i);
+        else
+          LED_Off(i);
+      }
 			
 			timerStatus.f1s = 0;		// reset flag
 		}

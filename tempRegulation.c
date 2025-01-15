@@ -2,6 +2,7 @@
 #include "I2C_TMP2.h"
 #include "PWM.h"
 #include "UART.h"
+#include "sensors_errors.h"
 
 #define INTEGRAL_LIMIT 10000
 
@@ -24,6 +25,10 @@ void calculatePID(void){
 	uint16_t output = 0;
 	int16_t temperatureErrorPrev = temperatureError;
 	temperatureError = setTemperature - currentTemperature;
+  if(sensors_errors.I2CDisconnected){
+    PWM_SetDutyCycle(0);
+    return;
+  }
 	
 	// Apply integral only if temperature is lower than 16
 	if(temperatureError < 16){
@@ -52,11 +57,21 @@ void calculatePID(void){
   UARTprintString(" o");
 	UARTprintInt(output);
   
-	PWM_SetDutyCycle(output);
+  // TODO: zapisanie danych i zrobienie wykresu oraz nastrojenie wartości Amplification_P/I/D
+  // Amplification_P - powinno być dobrze
+  // Amplification_I - ustawić tak, aby pojawiła się oscylacja i wybicie ponad określoną temperaturę
+  // Amplification_D - ustawić tak, aby zniwelować oscylacje
+//	PWM_SetDutyCycle(output);
+  
+  // TODO: przetestowanie obliczania mocy grzejnika
+  // dla 100% grzejnik generuje około 4,4 W
+  // więc dla 50% powinien około 2,2 W
+  PWM_SetDutyCycle(50);
 }
 
 void twoPositionalControl(void){
 	temperatureError = setTemperature - currentTemperature;
+  
 	if(currentTemperature > setTemperature){
 		heaterPower = 0;
 		PWM_SetDutyCycle(0);		// set Pulse duration of PWM to zero, which is turning it off

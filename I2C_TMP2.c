@@ -1,5 +1,6 @@
 #include "I2C_TMP2.h"
 #include "UART.h"
+#include "sensors_errors.h"
 
 ARM_DRIVER_I2C *I2Cdrv = &Driver_I2C0;
 volatile uint32_t I2C_Event = 0U;
@@ -14,11 +15,12 @@ void I2C_SignalEvent(uint32_t event) {
   if (event & ARM_I2C_EVENT_TRANSFER_DONE) { /* Transfer or receive is finished */ }
   if (event & ARM_I2C_EVENT_ADDRESS_NACK) { 
     // which means, sensor was unplugged... right? it should be :| 
-    UARTprintString("Slave address was not acknowledged"); 
-  }
+    UARTprintString("I2C Slave address was not acknowledged\t"); 
+    sensors_errors.I2CDisconnected = 1;
+  }else { sensors_errors.I2CDisconnected = 0; }
   if (event & ARM_I2C_EVENT_ARBITRATION_LOST) { /* Master lost bus arbitration */ } 
   if (event & ARM_I2C_EVENT_BUS_ERROR) { 
-    UARTprintString("invalid start/stop position detected"); 
+    UARTprintString("I2C invalid start/stop position detected\t"); 
   }
   if (event & ARM_I2C_EVENT_BUS_CLEAR) { /* Bus clear operation completed */ }
   if (event & ARM_I2C_EVENT_GENERAL_CALL) { /* Slave was addressed with a general call address */ }
