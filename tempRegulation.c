@@ -6,7 +6,6 @@
 
 #define INTEGRAL_LIMIT 10000
 
-// TODO: tune amplifications, calibrate, propert Amplification values
 // Amplification values
 float Amplification_P = 20.0; //0.1;
 float Amplification_I = 0.01; //0.01;
@@ -52,7 +51,7 @@ uint16_t calculatePID(void){
 	// P_on = (V_cc * V_cc) / R_heater
 	// P_avg = D * P_on 	where D is value between 0-1, that is time when heater is ON during 1 second
 	//heaterPower = output * 0.0439; // output/100 * (6*6/8.2);
-	heaterPower = output; 
+	heaterPower = output * 0.0439;
   
   return output;
 }
@@ -64,8 +63,7 @@ void twoPositionalControl(void){
 		heaterPower = 0;
 		PWM_SetDutyCycle(0);		// set Pulse duration of PWM to zero, which is turning it off
 	}else{
-		//heaterPower = 100 * 0.0439;
-    heaterPower = 100;
+		heaterPower = 100 * 0.0439;
 		PWM_SetDutyCycle(100);	// 100% - max time of PWM
 	}
 }

@@ -4,11 +4,18 @@
 #include "tempRegulation.h"
 #include "I2C_TMP2.h"
 #include "sensors_errors.h"
-#include "UART.h"
+#include "utils.h"
 
 void initLCDScreen(void){
 	lcdConfiguration();
 	init_ILI9325();
+}
+
+void drawRemainingSpaceWithSpaces(uint16_t x, uint16_t y, uint8_t spacesCount, uint16_t fontColor, uint16_t backgroundColor){
+  for(int8_t i=0; i<spacesCount; ++i){
+    drawLetter(x,y,' ', fontColor, backgroundColor);
+    x+=LETTER_WIDTH;
+  }
 }
 
 void drawLetter(uint16_t x, uint16_t y, c_uchar letter, uint16_t fontColor, uint16_t backgroundColor){
@@ -53,14 +60,8 @@ void drawIntNumber(uint16_t x, uint16_t y, int16_t number, uint16_t fontColor, u
     --spacesCount;
   }
   
-  int8_t digits = 0;
-  int16_t number_cpy = number;
   // count digits
-  do{
-    number_cpy = number_cpy / 10;
-    ++digits;
-  }while(number_cpy);
-  
+  int8_t digits = getNumberOfDigits(number);
   // calculate how many spaces to write, after number, to clear screen
 	spacesCount -= digits;
   
@@ -75,10 +76,7 @@ void drawIntNumber(uint16_t x, uint16_t y, int16_t number, uint16_t fontColor, u
     --digits;
   }while(digits);
   
-  for(int8_t i = 0; i<spacesCount; ++i){
-    drawLetter(x,y,' ',DEFAULT_FONT_COLOR,DEFAULT_BG_COLOR);
-    x+=LETTER_WIDTH;
-  }
+  drawRemainingSpaceWithSpaces(x,y,spacesCount,fontColor,backgroundColor);
 }
 
 void drawFloatNumber(uint16_t x, uint16_t y, float number, uint8_t precision, uint16_t fontColor, uint16_t backgroundColor){
@@ -88,26 +86,19 @@ void drawFloatNumber(uint16_t x, uint16_t y, float number, uint8_t precision, ui
     drawLetter(x,y,'-',fontColor,backgroundColor);
     number *= -1;
     x += LETTER_WIDTH;
-	--spacesCount;
+    --spacesCount;
   }
   
   for(uint8_t i=0;i<precision; ++i) { number*=10.0; }
   
-  int8_t digits = 0;
-  uint16_t number_cpy = number;
   // count digits
-  do{
-    number_cpy = number_cpy / 10;
-    ++digits;
-  }while(number_cpy);
-  
+  int8_t digits = getNumberOfDigits((uint16_t)number);
   // calculate how many spaces to write, after number, to clear screen
   spacesCount-=digits+1; // +1 is a dot '.' to needed to write
   
   int modulator = 1;
   for(uint8_t i=1;i<digits; ++i) { modulator *= 10; }
-  
-    uint16_t number_int = number;
+  uint16_t number_int = number;
   
   do{
     if(digits == precision){
@@ -116,17 +107,53 @@ void drawFloatNumber(uint16_t x, uint16_t y, float number, uint8_t precision, ui
 	}
 	drawLetter(x,y,'0'+(number_int/modulator),fontColor,backgroundColor);
     x += LETTER_WIDTH;
-	number_int=number_int%modulator;
-	--digits;
+    number_int=number_int%modulator;
+    --digits;
     modulator /= 10;
 	
   }while(digits);
   
-   for(int8_t i = 0; i<spacesCount; ++i){
-	drawLetter(x,y,' ',DEFAULT_FONT_COLOR,DEFAULT_BG_COLOR);
-	x+=LETTER_WIDTH;
-  }
+  drawRemainingSpaceWithSpaces(x,y,spacesCount,fontColor,backgroundColor);
+}
 
+void drawHeaterPower(uint16_t x, uint16_t y, float number, uint8_t precision, uint16_t fontColor, uint16_t backgroundColor){
+  int8_t spacesCount = MAX_NUMBER_LENGTH;
+  // draw minus ('-') if number if lower than zero
+  if(number < 0){
+    drawLetter(x,y,'-',fontColor,backgroundColor);
+    number *= -1;
+    x += LETTER_WIDTH;
+    --spacesCount;
+  }
+  
+  for(uint8_t i=0;i<precision; ++i) { number*=10.0; }
+  
+  // count digits
+  int8_t digits = getNumberOfDigits((uint16_t)number);
+  // calculate how many spaces to write, after number, to clear screen
+  spacesCount-=digits+1; // +1 is a dot '.' to needed to write
+  
+  int modulator = 1;
+  for(uint8_t i=1;i<digits; ++i) { modulator *= 10; }
+  uint16_t number_int = number;
+  
+  do{
+    if(digits == precision){
+      drawLetter(x,y,'.',fontColor,backgroundColor);
+      x += LETTER_WIDTH;
+    }
+    drawLetter(x,y,'0'+(number_int/modulator),fontColor,backgroundColor);
+    x += LETTER_WIDTH;
+    number_int=number_int%modulator;
+    --digits;
+    modulator /= 10;
+  }while(digits);
+  
+  drawLetter(x,y,' ',fontColor,backgroundColor);
+  x += LETTER_WIDTH;
+  drawLetter(x,y,'W',fontColor,backgroundColor);
+  x += LETTER_WIDTH;
+  drawRemainingSpaceWithSpaces(x,y,spacesCount,fontColor,backgroundColor);
 }
 
 void setBackground(uint16_t backgroundColor){
@@ -143,11 +170,11 @@ void updateDataOnScreen(void){
   if(sensors_errors.I2CDisconnected == 0)
     drawFloatNumber(PADDING_SIDE+13*LETTER_WIDTH,PADDING_TOP, currentTemperature,2, DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
   else
-    drawString(PADDING_SIDE+13*LETTER_WIDTH,PADDING_TOP, (c_uchar*) "Error", DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+    drawString(PADDING_SIDE+13*LETTER_WIDTH,PADDING_TOP, (c_uchar*)"Error", DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
 
-  drawIntNumber(PADDING_SIDE+17*LETTER_WIDTH,PADDING_TOP+LETTER_HEIGHT+PADDING_TOP,       setTemperature,			DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
-  drawFloatNumber(PADDING_SIDE+19*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*2,   temperatureError, 2,		DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
-  drawFloatNumber(PADDING_SIDE+07*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*3, heaterPower, 2,		  DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+  drawIntNumber(  PADDING_SIDE+17*LETTER_WIDTH,PADDING_TOP+LETTER_HEIGHT+PADDING_TOP,       setTemperature,			  DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+  drawFloatNumber(PADDING_SIDE+19*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*2,   temperatureError, 2,	DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
+  drawHeaterPower(PADDING_SIDE+07*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*3,   heaterPower, 2,		    DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
   if(PIDControl)
     drawString(PADDING_SIDE+14*LETTER_WIDTH,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*4, (c_uchar*)"PID           ", DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
   else
@@ -167,4 +194,3 @@ void drawConstantDataOnScreen(void){
 	drawString(PADDING_SIDE,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*3, (c_uchar*)"Power: ",             DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
   drawString(PADDING_SIDE,PADDING_TOP+(LETTER_HEIGHT+PADDING_TOP)*4, (c_uchar*)"Control Mode: ",      DEFAULT_FONT_COLOR, DEFAULT_BG_COLOR);
 }
-	

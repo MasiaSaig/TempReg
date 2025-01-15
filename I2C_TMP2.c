@@ -14,12 +14,12 @@ void I2C_SignalEvent(uint32_t event) {
   if (event & ARM_I2C_EVENT_TRANSFER_INCOMPLETE) { /* Less data was transferred than requested */ }
   if (event & ARM_I2C_EVENT_TRANSFER_DONE) { /* Transfer or receive is finished */ }
   if (event & ARM_I2C_EVENT_ADDRESS_NACK) { 
-    UARTprintString("I2C Slave address was not acknowledged\t"); 
+    UARTprintString("I2C Slave address was not acknowledged\r\n"); 
     sensors_errors.I2CDisconnected = 1;
   }else { sensors_errors.I2CDisconnected = 0; }
   if (event & ARM_I2C_EVENT_ARBITRATION_LOST) { /* Master lost bus arbitration */ } 
   if (event & ARM_I2C_EVENT_BUS_ERROR) { 
-    UARTprintString("I2C invalid start/stop position detected\t"); 
+    UARTprintString("I2C invalid start/stop position detected\r\n"); 
   }
   if (event & ARM_I2C_EVENT_BUS_CLEAR) { /* Bus clear operation completed */ }
   if (event & ARM_I2C_EVENT_GENERAL_CALL) { /* Slave was addressed with a general call address */ }

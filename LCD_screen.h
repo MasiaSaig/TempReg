@@ -80,6 +80,9 @@ void drawIntNumber(uint16_t x, uint16_t y, int16_t number, uint16_t fontColor, u
  * @return void
  */
 void drawFloatNumber(uint16_t x, uint16_t y, float number, uint8_t precision, uint16_t fontColor, uint16_t backgroundColor);
+
+void drawHeaterPower(uint16_t x, uint16_t y, float number, uint8_t precision, uint16_t fontColor, uint16_t backgroundColor);
+void drawRemainingSpaceWithSpaces(uint16_t x, uint16_t y, uint8_t spacesCount, uint16_t fontColor, uint16_t backgroundColor);
 /**
  * Sets whole screen to given color. 
  *
