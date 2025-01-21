@@ -57,6 +57,10 @@ uint16_t calculatePID(void){
 }
 
 void twoPositionalControl(void){
+  if(sensors_errors.I2CDisconnected){
+    PWM_SetDutyCycle(0);
+    return ;
+	}
 	temperatureError = setTemperature - currentTemperature;
   
 	if(currentTemperature > setTemperature){
