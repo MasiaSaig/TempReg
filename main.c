@@ -137,13 +137,14 @@ int main(){
 			else
 				twoPositionalControl();
 			
-      // turn ON/OFF LEDs according to current power consumption
-      for(float i=0; i<LED_COUNT; ++i){
-        if((heaterPower/MAX_HEATER_POWER) * (i+1) < heaterPower)
-          LED_On(i);
-        else
-          LED_Off(i);
-      }
+			// turn ON/OFF LEDs according to current power consumption
+			LED_Off();
+			uint8_t leds_on = (heaterPower/MAX_HEATER_POWER) * LED_COUNT;
+			for(uint8_t i=0; i<leds_on; ++i){
+				LED_On(i);
+			}
+          
+        
 			timerStatus.f1s = 0;		// reset flag
 		}
 	}
