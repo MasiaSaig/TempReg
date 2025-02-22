@@ -1,5 +1,5 @@
 # Temperature Regulator
-It recives current temperature from thermometer and using PWM, regulates duration of time, when the heater is turned ON in order to keep steady set temperature. 
+It recives current temperature from thermometer and using PWM, regulates duration of time, when the heater is turned ON in order to keep steady, set temperature. 
 There are two supported control modes: proportional and two-positional
 
 ## Used components
