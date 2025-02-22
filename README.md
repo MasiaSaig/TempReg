@@ -9,4 +9,6 @@ There are two supported control modes: proportional and two-positional
 - heater, build with resistors, connected to transistor
 - UART to output debug logs
 
+![Image](https://github.com/user-attachments/assets/79335539-703d-47f9-b235-a7b75475f67d)
+
 This program was written in Keil uVision using C, by Maciej Müller and Piotr Żeberek
