@@ -1,6 +1,6 @@
 # Temperature Regulator
 It recives current temperature from thermometer and using PWM, regulates duration of time, when the heater is turned ON in order to keep steady, set temperature. 
-There are two supported control modes: proportional and two-positional
+There are two supported control modes: proportional and two-positional.
 
 ## Used components
 - LPC1768, ARM Cortex M3 with KEY1 and KEY2 buttons 
@@ -11,4 +11,4 @@ There are two supported control modes: proportional and two-positional
 
 ![Image](https://github.com/user-attachments/assets/79335539-703d-47f9-b235-a7b75475f67d)
 
-This program was written in Keil uVision using C, by Maciej Müller and Piotr Żeberek
+This program was written in Keil uVision using C, by Maciej Müller and Piotr Żeberek.
